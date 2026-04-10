@@ -1243,5 +1243,11 @@ calcBlender();
 calcTopoff();
 calcModMix();
 </script>
+<script>
+  window.onload = function() {
+    const height = document.documentElement.scrollHeight;
+    window.parent.postMessage({ frameHeight: height }, '*');
+  };
+</script>
 </body>
 </html>
