@@ -165,7 +165,7 @@
     display: none; padding: 0.75rem 1rem;
     background: var(--err-bg); border: 1px solid var(--err-border);
     border-radius: 8px; margin-bottom: 1.5rem;
-    font-size: 0.9rem; color: var(--err-color); line-height: 1.5;
+    font-size: 1.05rem; font-weight: 700; text-align: center; color: var(--err-color); line-height: 1.5;
   }
   .error-banner.visible { display: block; }
 
@@ -175,7 +175,7 @@
   }
   .best-i-can-do.visible { display: block; }
   .best-i-can-do-header {
-    background: linear-gradient(135deg, #3a2a10, #4a3520);
+    background: var(--warn-bg);
     padding: 1.25rem 1rem 1rem; text-align: center;
   }
   .best-i-can-do-header .meme-text {
@@ -189,8 +189,7 @@
   }
   .best-i-can-do-body { padding: 1rem; text-align: center; }
   .best-mix { font-size: 2.5rem; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
-  .best-mix-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.15rem; }
-  .best-mix-detail { font-size: 0.85rem; color: var(--text-dim); line-height: 1.6; margin-top: 0.4rem; }
+  .best-mix-detail { font-size: 1.0rem; color: var(--text-dim); line-height: 1.6; margin-top: 0.4rem; }
 
   .dive-row { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0; }
   .dive-row + .dive-row { border-top: 1px solid var(--border); }
@@ -250,7 +249,6 @@
         <button data-unit="bar">BAR</button>
       </div>
     </div>
-    <div class="error-banner" id="b-error"></div>
     <div class="calc-grid">
       <div class="col">
         <div class="section">
@@ -323,15 +321,15 @@
       </div>
     </div>
     <div class="best-i-can-do" id="b-best">
+      <div class="error-banner" id="b-error" style="margin:0; border-radius:0; border:none; border-bottom:1px solid var(--err-border);"></div>
       <div class="best-i-can-do-header">
         <img id="best-img" class="best-img" src="https://i.kym-cdn.com/photos/images/original/002/137/897/75a.jpg" alt="">
         <div class="meme-text">Best I can do is...</div>
       </div>
       <div class="best-i-can-do-body">
         <div class="best-mix" id="b-best-mix">—</div>
-        <div class="best-mix-label">O₂ / He</div>
         <div class="best-mix-detail" id="b-best-detail"></div>
-        <div class="best-mix-detail" id="b-best-recipe" style="margin-top:0.6rem; padding-top:0.6rem; border-top:1px solid var(--border);"></div>
+        <div class="best-mix-detail" id="b-best-recipe" style="margin-top:0.6rem; padding-top:0.6rem; border-top:1px solid var(--border); font-size:1.2rem; font-weight:700;"></div>
       </div>
     </div>
   </div>
