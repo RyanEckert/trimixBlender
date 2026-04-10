@@ -55,16 +55,16 @@
 
   header { text-align: center; margin-bottom: 3rem; }
   header h1 {
-    font-family: var(--display); font-size: 1.8rem; font-weight: 700;
+    font-family: var(--display); font-size: 3.2rem; font-weight: 700;
     letter-spacing: 0.08em; text-transform: uppercase;
     color: var(--text); margin-bottom: 0.35rem;
   }
-  header p { font-size: 0.85rem; color: var(--text-muted); letter-spacing: 0.05em; }
+  header p { font-size: 1.0rem; color: var(--text-muted); letter-spacing: 0.05em; }
 
   .tabs { display: flex; gap: 2px; margin-bottom: 2.25rem; background: var(--surface); border-radius: 10px; padding: 4px; }
   .tab {
     flex: 1; padding: 0.75rem; text-align: center;
-    font-family: var(--mono); font-size: 0.9rem; font-weight: 500;
+    font-family: var(--mono); font-size: 1.0rem; font-weight: 500;
     color: var(--text-dim); background: none; border: none;
     border-radius: 8px; cursor: pointer; transition: all 0.2s;
   }
@@ -92,7 +92,7 @@
   .section.error-state { border-color: var(--err-border); }
   .section.dimmed .section-body { opacity: 0.3; pointer-events: none; }
   .section-header {
-    font-size: 0.8rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+    font-size: 1.0rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
     color: var(--text-muted); padding: 0.7rem 1rem;
     background: var(--surface-raised); border-bottom: 1px solid var(--border); transition: color 0.2s;
   }
@@ -102,7 +102,8 @@
 
   .input-row { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0; }
   .input-row + .input-row { border-top: 1px solid var(--border); }
-  .input-label { font-size: 0.95rem; font-weight: 400; color: var(--text-dim); }
+  .input-label { font-size: 1.05rem; font-weight: 60
+      0; color: var(--text-dim); }
   .input-label.he { color: var(--he-color); }
   .input-label.o2 { color: var(--o2-color); }
   .input-label.n2 { color: var(--n2-color); font-style: italic; font-size: 0.9rem; }
@@ -138,22 +139,25 @@
   .stop { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; }
   .stop + .stop { border-top: 1px solid var(--border); }
   .stop-num {
-    font-size: 0.8rem; font-weight: 600;
+    font-size: 1.0rem; font-weight: 600;
     width: 22px; height: 22px; display: flex; align-items: center;
     justify-content: center; border-radius: 50%; margin-right: 0.6rem; flex-shrink: 0;
   }
   .stop-label { font-size: 1rem; font-weight: 500; flex: 1; }
-  .stop-value { font-size: 1.3rem; font-weight: 600; letter-spacing: -0.02em; }
+  .stop-value { font-size: 1.3rem; font-weight: 600; letter-spacing: -0.02em; padding: 0.25rem 0.7rem; border-radius: 5px; }
   .stop.he .stop-num { background: var(--he-bg); color: var(--he-color); border: 1px solid var(--he-border); }
-  .stop.he .stop-label, .stop.he .stop-value { color: var(--he-color); }
+  .stop.he .stop-label { color: var(--he-color); }
+  .stop.he .stop-value { color: var(--he-color); background: var(--he-bg); }
   .stop.o2 .stop-num { background: var(--o2-bg); color: var(--o2-color); border: 1px solid var(--o2-border); }
-  .stop.o2 .stop-label, .stop.o2 .stop-value { color: var(--o2-color); }
+  .stop.o2 .stop-label { color: var(--o2-color); }
+  .stop.o2 .stop-value { color: var(--o2-color); background: var(--o2-bg); }
   .stop.top .stop-num { background: var(--top-bg); color: var(--top-color); border: 1px solid var(--top-border); }
-  .stop.top .stop-label, .stop.top .stop-value { color: var(--top-color); }
+  .stop.top .stop-label { color: var(--top-color); }
+  .stop.top .stop-value { color: var(--top-color); background: var(--top-bg); }
 
   .drain-box { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; }
   .drain-label { font-size: 1rem; font-weight: 500; color: var(--text-dim); }
-  .drain-value { font-size: 1.2rem; font-weight: 600; }
+  .drain-value { font-size: 1rem; font-weight: 600; }
   .drain-value.ok { color: var(--text-muted); }
   .drain-value.warn { color: var(--err-color); padding: 0.25rem 0.7rem; background: var(--err-bg); border-radius: 5px; }
 
@@ -179,9 +183,9 @@
     color: var(--warn-color); letter-spacing: 0.02em;
   }
   .best-img {
-    width: 90px; height: 90px; border-radius: 50%;
-    object-fit: cover; border: 3px solid rgba(241,250,140,0.35);
-    margin-bottom: 0.6rem;
+    width: 100%; max-width: 720px; height: auto; border-radius: 0;
+    object-fit: contain; border: 3px solid rgba(241,250,140,0.35);
+    margin: 0 auto 0.75rem; display: block;
   }
   .best-i-can-do-body { padding: 1rem; text-align: center; }
   .best-mix { font-size: 2.5rem; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
@@ -221,6 +225,7 @@
   <div class="tabs">
     <button class="tab active" data-tab="blender">Blending Calculator</button>
     <button class="tab" data-tab="topoff">Top-Off Calculator</button>
+    <button class="tab" data-tab="modmix">MOD / Best Mix</button>
   </div>
 
   <!-- ==================== BLENDER ==================== -->
@@ -388,6 +393,83 @@
     </div>
   </div>
 
+  <!-- ==================== MOD / BEST MIX ==================== -->
+  <div id="modmix" class="tab-content">
+    <div class="units-bar">
+      <span>Units</span>
+      <div class="toggle" id="units3">
+        <button class="active" data-unit="psi">PSI</button>
+        <button data-unit="bar">BAR</button>
+      </div>
+    </div>
+    <div class="calc-grid">
+      <div class="col">
+        <!-- MOD Calculator -->
+        <div class="section">
+          <div class="section-header">MOD Calculator</div>
+          <div class="section-body">
+            <div class="input-row"><span class="input-label o2">O₂ %</span><input type="number" class="o2-input" id="m-o2" value="10" min="0" max="100"></div>
+            <div class="input-row"><span class="input-label he">He %</span><input type="number" class="he-input" id="m-he" value="70" min="0" max="100"></div>
+            <div class="input-row"><span class="input-label n2">N₂ %</span><span class="derived" id="m-n2">20.0</span></div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-header">Maximum Operating Depth</div>
+          <div class="section-body">
+            <div class="dive-row"><span class="dive-label">MOD @ ppO₂ 1.2</span><span class="dive-value" id="m-mod12">—</span></div>
+            <div class="dive-row"><span class="dive-label">MOD @ ppO₂ 1.3</span><span class="dive-value" id="m-mod13">—</span></div>
+            <div class="dive-row"><span class="dive-label">MOD @ ppO₂ 1.4</span><span class="dive-value" id="m-mod14">—</span></div>
+            <div class="dive-row"><span class="dive-label">MOD @ ppO₂ 1.6</span><span class="dive-value" id="m-mod16">—</span></div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-header">END at MOD</div>
+          <div class="section-body">
+            <div class="dive-row"><span class="dive-label">END @ MOD 1.2</span><span class="dive-value" id="m-end12">—</span></div>
+            <div class="dive-row"><span class="dive-label">END @ MOD 1.3</span><span class="dive-value" id="m-end13">—</span></div>
+            <div class="dive-row"><span class="dive-label">END @ MOD 1.4</span><span class="dive-value" id="m-end14">—</span></div>
+            <div class="dive-row"><span class="dive-label">END @ MOD 1.6</span><span class="dive-value" id="m-end16">—</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <!-- Best Mix Calculator -->
+        <div class="section">
+          <div class="section-header">Best Mix Calculator</div>
+          <div class="section-body">
+            <div class="input-row">
+              <span class="input-label" style="color:var(--depth-color)">Planned depth</span>
+              <div class="input-wrap"><input type="number" class="depth-input" id="m-depth" value="200" min="0"><span class="input-suffix m-du">fsw</span></div>
+            </div>
+            <div class="input-row">
+              <span class="input-label" style="color:var(--depth-color)">Target END</span>
+              <div class="input-wrap"><input type="number" class="depth-input" id="m-end-target" value="100" min="0"><span class="input-suffix m-du">fsw</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-header">Best O₂ % for depth</div>
+          <div class="section-body">
+            <div class="result-row"><span class="result-label o2">@ ppO₂ 1.2</span><span class="result-value rv-o2" id="m-bo2-12">—</span></div>
+            <div class="result-row"><span class="result-label o2">@ ppO₂ 1.3</span><span class="result-value rv-o2" id="m-bo2-13">—</span></div>
+            <div class="result-row"><span class="result-label o2">@ ppO₂ 1.4</span><span class="result-value rv-o2" id="m-bo2-14">—</span></div>
+            <div class="result-row"><span class="result-label o2">@ ppO₂ 1.6</span><span class="result-value rv-o2" id="m-bo2-16">—</span></div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-header">He % for target END</div>
+          <div class="section-body">
+            <div class="result-row"><span class="result-label he">He needed</span><span class="result-value rv-he" id="m-he-needed">—</span></div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-header">Recommended Mixes</div>
+          <div class="section-body" id="m-mixes-body"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <footer>
     <p>All calculations use the partial pressure blending method.<br>
     Verify all blends with an analyzer before diving.</p>
@@ -395,6 +477,9 @@
 </div>
 
 <script>
+const PSI_TO_BAR = 0.0689476;
+const FT_TO_M = 0.3048;
+
 const $ = id => document.getElementById(id);
 const val = id => parseFloat($(id).value) || 0;
 const fmt = (n, d=0) => d === 0 ? Math.round(n).toLocaleString() : n.toFixed(d);
@@ -410,9 +495,66 @@ function roundConsistent(values) {
   return result;
 }
 
-let units1 = 'psi', units2 = 'psi';
+let units1 = 'psi', units2 = 'psi', units3 = 'psi';
 const dfact = u => u === 'psi' ? 33 : 10;
 const dunit = u => u === 'psi' ? 'fsw' : 'msw';
+
+// === CANONICAL VALUE SYSTEM ===
+// Each pressure/depth input stores its true PSI/ft value in data-canonical.
+// Display is derived from canonical. User edits update canonical immediately.
+
+function initCanonical(id, type) {
+  const el = $(id);
+  // type: 'pressure' or 'depth'
+  el.dataset.canonical = el.value || '0';
+  el.dataset.canonType = type;
+}
+
+function getCanonical(id) {
+  return parseFloat($(id).dataset.canonical || $(id).value || 0);
+}
+
+function setCanonical(id, val) {
+  $(id).dataset.canonical = val;
+}
+
+// Read canonical PSI value
+function readPsi(id) { return getCanonical(id); }
+
+// Read canonical depth in feet
+function readFt(id) { return getCanonical(id); }
+
+// Display a PSI value in current units
+function showPressure(psi, unit) { return Math.round(unit === 'bar' ? psi * PSI_TO_BAR : psi); }
+
+// Display a ft value in current units
+function showDepth(ft, unit) { return Math.round(unit === 'bar' ? ft * FT_TO_M : ft); }
+
+// When user types in a pressure field, update canonical
+function onPressureInput(id, unit) {
+  const displayed = parseFloat($(id).value || 0);
+  const psi = unit === 'bar' ? displayed / PSI_TO_BAR : displayed;
+  setCanonical(id, psi);
+}
+
+// When user types in a depth field, update canonical
+function onDepthInput(id, unit) {
+  const displayed = parseFloat($(id).value || 0);
+  const ft = unit === 'bar' ? displayed / FT_TO_M : displayed;
+  setCanonical(id, ft);
+}
+
+// On unit toggle, re-display all fields from canonical
+function convertFields(ids, types, newUnit) {
+  ids.forEach((id, i) => {
+    const canon = getCanonical(id);
+    if (types[i] === 'pressure') {
+      $(id).value = showPressure(canon, newUnit);
+    } else {
+      $(id).value = showDepth(canon, newUnit);
+    }
+  });
+}
 
 function topoffName(o2, he) {
   o2 = Math.round(o2); he = Math.round(he);
@@ -421,6 +563,7 @@ function topoffName(o2, he) {
   return o2 + '/' + he;
 }
 
+// === TABS ===
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -428,6 +571,7 @@ document.querySelectorAll('.tab').forEach(tab => {
     tab.classList.add('active'); $(tab.dataset.tab).classList.add('active');
   });
 });
+
 function setupToggle(id, cb) {
   document.getElementById(id).querySelectorAll('button').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -436,9 +580,8 @@ function setupToggle(id, cb) {
     });
   });
 }
-setupToggle('units1', u => { units1 = u; calcBlender(); });
-setupToggle('units2', u => { units2 = u; calcTopoff(); });
 
+// === CORE MATH ===
 function calcBlend(topO2, topHe, topN2, startP, curO2, curHe, curN2, tgtP, tgtO2, tgtHe, tgtN2) {
   const ppO2f = tgtO2/100*tgtP, ppHef = tgtHe/100*tgtP, ppN2f = tgtN2/100*tgtP;
   const ppO2h = curO2/100*startP, ppHeh = curHe/100*startP, ppN2h = curN2/100*startP;
@@ -462,8 +605,7 @@ function calcDrainTo(topO2, topHe, topN2, curO2, curHe, curN2, tgtP, tgtO2, tgtH
 }
 
 function bestMix(topO2, topHe, topN2, curP, curO2, curHe, curN2, tgtP, tgtHe) {
-  const ppHe_want = tgtHe/100 * tgtP;
-  const ppHe_have = curHe/100 * curP;
+  const ppHe_want = tgtHe/100 * tgtP, ppHe_have = curHe/100 * curP;
   const heAdd = ppHe_want - ppHe_have;
   if (heAdd < 0) {
     const remaining = tgtP - curP;
@@ -474,27 +616,32 @@ function bestMix(topO2, topHe, topN2, curP, curO2, curHe, curN2, tgtP, tgtHe) {
   return { o2: (curO2/100*curP + topO2/100*topoffPsi)/tgtP*100, he: (curHe/100*curP + heAdd + topHe/100*topoffPsi)/tgtP*100 };
 }
 
-function diveData(fO2, fHe, depth, df) {
-  const u = df === 33 ? 'fsw' : 'msw';
+function diveData(fO2, fHe, depthFt, unit) {
+  const df = unit === 'psi' ? 33 : 10;
+  const depth = unit === 'psi' ? depthFt : depthFt * FT_TO_M;
+  const du = unit === 'psi' ? 'fsw' : 'msw';
   return {
-    ppo2: (fO2*(depth/df+1)).toFixed(2),
-    end: fmt(((1-fHe)*(depth+df)/df-1)*df) + ' ' + u,
-    mod12: fO2 > 0 ? fmt(((1.2/fO2)-1)*df) + ' ' + u : '—',
-    mod13: fO2 > 0 ? fmt(((1.3/fO2)-1)*df) + ' ' + u : '—',
-    mod14: fO2 > 0 ? fmt(((1.4/fO2)-1)*df) + ' ' + u : '—',
-    mod16: fO2 > 0 ? fmt(((1.6/fO2)-1)*df) + ' ' + u : '—',
+    ppo2: (fO2*(depthFt/33+1)).toFixed(2),
+    end: fmt(((1-fHe)*(depth+df)/df-1)*df) + ' ' + du,
+    mod12: fO2 > 0 ? fmt(((1.2/fO2)-1)*df) + ' ' + du : '—',
+    mod13: fO2 > 0 ? fmt(((1.3/fO2)-1)*df) + ' ' + du : '—',
+    mod14: fO2 > 0 ? fmt(((1.4/fO2)-1)*df) + ' ' + du : '—',
+    mod16: fO2 > 0 ? fmt(((1.6/fO2)-1)*df) + ' ' + du : '—',
   };
 }
 
+// === BLENDER ===
 function calcBlender() {
-  const pu = units1, df = dfact(units1), _du = dunit(units1);
+  const pu = units1, du = dunit(units1);
   document.querySelectorAll('.b-pu').forEach(el => el.textContent = pu);
-  document.querySelectorAll('.b-du').forEach(el => el.textContent = _du);
+  document.querySelectorAll('.b-du').forEach(el => el.textContent = du);
 
-  const curP = val('b-cur-psi'), curO2 = val('b-cur-o2'), curHe = val('b-cur-he'), curN2 = 100-curO2-curHe;
-  const tgtP = val('b-tgt-psi'), tgtO2 = val('b-tgt-o2'), tgtHe = val('b-tgt-he'), tgtN2 = 100-tgtO2-tgtHe;
+  // Read all values in PSI/ft (canonical)
+  const curP = readPsi('b-cur-psi'), tgtP = readPsi('b-tgt-psi');
+  const curO2 = val('b-cur-o2'), curHe = val('b-cur-he'), curN2 = 100-curO2-curHe;
+  const tgtO2 = val('b-tgt-o2'), tgtHe = val('b-tgt-he'), tgtN2 = 100-tgtO2-tgtHe;
   const topO2 = val('b-top-o2'), topHe = val('b-top-he'), topN2 = 100-topO2-topHe;
-  const depth = val('b-depth');
+  const depthFt = readFt('b-depth');
 
   $('b-cur-n2').textContent = curN2.toFixed(1);
   $('b-tgt-n2').textContent = tgtN2.toFixed(1);
@@ -509,6 +656,8 @@ function calcBlender() {
   if (topN2 <= 0 && tgtN2 > 0.5) errors.push('Top-off gas has no N₂ — cannot achieve target N₂');
 
   const errEl = $('b-error'), bestEl = $('b-best');
+  const sp = v => showPressure(v, pu);
+
   const clearResults = () => {
     ['b-add-he','b-add-o2','b-add-top'].forEach(id => $(id).textContent = '—');
     $('b-stops-body').innerHTML = '';
@@ -529,6 +678,7 @@ function calcBlender() {
     clearResults(); return;
   }
 
+  // All math in PSI
   let { heAdd, o2Add, topPsi } = calcBlend(topO2, topHe, topN2, curP, curO2, curHe, curN2, tgtP, tgtO2, tgtHe, tgtN2);
   let startP = curP;
   const drainNeeded = heAdd < -0.5 || o2Add < -0.5 || topPsi < -0.5;
@@ -545,10 +695,10 @@ function calcBlender() {
     const bStops = [];
     let bGauge = Math.round(curP);
     const [bHeR, bO2R, bTopR] = roundConsistent([Math.max(0,bestBlend.heAdd), Math.max(0,bestBlend.o2Add), Math.max(0,bestBlend.topPsi)]);
-    if (bHeR >= 1) { bGauge += bHeR; bStops.push('He → ' + bGauge.toLocaleString()); }
-    if (bO2R >= 1) { bGauge += bO2R; bStops.push('O₂ → ' + bGauge.toLocaleString()); }
-    if (bTopR >= 1) { bStops.push(tName + ' → ' + fmt(tgtP)); }
-    $('b-best-recipe').innerHTML = bStops.length ? '<span style="color:var(--text-muted)">Recipe: </span>' + bStops.join(' · ') : '';
+    if (bHeR >= 1) { bGauge += bHeR; bStops.push('He → ' + sp(bGauge)); }
+    if (bO2R >= 1) { bGauge += bO2R; bStops.push('O₂ → ' + sp(bGauge)); }
+    if (bTopR >= 1) { bStops.push(tName + ' → ' + sp(tgtP)); }
+    $('b-best-recipe').innerHTML = bStops.length ? '<span style="color:var(--text-muted)">Fill plan: </span>' + bStops.join(' · ') : '';
     bestEl.classList.add('visible');
     ['b-add-section','b-stops-section'].forEach(id => $(id).classList.add('dimmed'));
     $('b-drain').textContent = 'Not possible'; $('b-drain').className = 'drain-value warn';
@@ -562,7 +712,8 @@ function calcBlender() {
     const check = calcBlend(topO2, topHe, topN2, drainTo, curO2, curHe, curN2, tgtP, tgtO2, tgtHe, tgtN2);
     if (check.heAdd < -0.5 || check.o2Add < -0.5 || check.topPsi < -0.5) { showImpossible(); return; }
     hideImpossible();
-    $('b-drain').textContent = fmt(drainTo) + ' ' + pu; $('b-drain').className = 'drain-value warn';
+    $('b-drain').textContent = sp(drainTo) + ' ' + pu;
+    $('b-drain').className = 'drain-value warn';
     $('b-drain-section').classList.add('warn-state'); $('b-drain-section').classList.remove('error-state');
     startP = drainTo;
     ({ heAdd, o2Add, topPsi } = calcBlend(topO2, topHe, topN2, startP, curO2, curHe, curN2, tgtP, tgtO2, tgtHe, tgtN2));
@@ -571,12 +722,14 @@ function calcBlender() {
     $('b-drain').textContent = 'No drain needed'; $('b-drain').className = 'drain-value ok';
   }
 
+  // Gas amounts (in PSI), display in current unit
   const [heR, o2R, topR] = roundConsistent([heAdd, o2Add, topPsi]);
   $('b-top-label').textContent = 'Top-off ' + tName;
-  $('b-add-he').textContent = heR.toLocaleString();
-  $('b-add-o2').textContent = o2R.toLocaleString();
-  $('b-add-top').textContent = topR.toLocaleString();
+  $('b-add-he').textContent = sp(heR);
+  $('b-add-o2').textContent = sp(o2R);
+  $('b-add-top').textContent = sp(topR);
 
+  // Gauge stops in PSI, display in current unit
   const stops = []; let gauge = Math.round(startP);
   if (heR >= 1) { gauge += heR; stops.push({ gas:'he', label:'Helium', value:gauge }); }
   if (o2R >= 1) { gauge += o2R; stops.push({ gas:'o2', label:'Oxygen', value:gauge }); }
@@ -589,25 +742,31 @@ function calcBlender() {
   } else {
     stops.forEach((s, i) => {
       const div = document.createElement('div'); div.className = 'stop ' + s.gas;
-      div.innerHTML = '<span class="stop-num">' + (i+1) + '</span><span class="stop-label">' + s.label + '</span><span class="stop-value">' + s.value.toLocaleString() + ' ' + pu + '</span>';
+      div.innerHTML = '<span class="stop-num">' + (i+1) + '</span><span class="stop-label">' + s.label + '</span><span class="stop-value">' + sp(s.value) + ' ' + pu + '</span>';
       stopsBody.appendChild(div);
     });
   }
 
-  const dd = diveData(tgtO2/100, tgtHe/100, depth, df);
-  $('b-ppo2').textContent = dd.ppo2; $('b-end').textContent = dd.end;
-  $('b-mod12').textContent = dd.mod12; $('b-mod13').textContent = dd.mod13;
-  $('b-mod14').textContent = dd.mod14; $('b-mod16').textContent = dd.mod16;
+  // Dive data — always from ft internally
+  const dd = diveData(tgtO2/100, tgtHe/100, depthFt, pu);
+  $('b-ppo2').textContent = dd.ppo2;
+  $('b-end').textContent = dd.end;
+  $('b-mod12').textContent = dd.mod12;
+  $('b-mod13').textContent = dd.mod13;
+  $('b-mod14').textContent = dd.mod14;
+  $('b-mod16').textContent = dd.mod16;
 }
 
+// === TOP-OFF ===
 function calcTopoff() {
-  const pu = units2, df = dfact(units2), _du = dunit(units2);
+  const pu = units2, du = dunit(units2);
   document.querySelectorAll('.t-pu').forEach(el => el.textContent = pu);
-  document.querySelectorAll('.t-du').forEach(el => el.textContent = _du);
+  document.querySelectorAll('.t-du').forEach(el => el.textContent = du);
 
-  const curP = val('t-cur-psi'), curO2 = val('t-cur-o2'), curHe = val('t-cur-he'), curN2 = 100-curO2-curHe;
+  const curP = readPsi('t-cur-psi'), tgtP = readPsi('t-tgt-psi');
+  const curO2 = val('t-cur-o2'), curHe = val('t-cur-he'), curN2 = 100-curO2-curHe;
   const fillO2 = val('t-fill-o2'), fillHe = val('t-fill-he'), fillN2 = 100-fillO2-fillHe;
-  const tgtP = val('t-tgt-psi'), depth = val('t-depth');
+  const depthFt = readFt('t-depth');
 
   $('t-cur-n2').textContent = curN2.toFixed(1); $('t-fill-n2').textContent = fillN2.toFixed(1);
 
@@ -629,15 +788,135 @@ function calcTopoff() {
   $('t-res-o2').textContent = resO2.toFixed(1); $('t-res-he').textContent = resHe.toFixed(1); $('t-res-n2').textContent = resN2.toFixed(1);
   $('t-shorthand').textContent = Math.round(resO2) + '/' + Math.round(resHe);
 
-  const dd = diveData(resO2/100, resHe/100, depth, df);
+  const dd = diveData(resO2/100, resHe/100, depthFt, pu);
   $('t-ppo2').textContent = dd.ppo2; $('t-end').textContent = dd.end;
   $('t-mod12').textContent = dd.mod12; $('t-mod13').textContent = dd.mod13;
   $('t-mod14').textContent = dd.mod14; $('t-mod16').textContent = dd.mod16;
 }
 
-document.querySelectorAll('#blender input').forEach(el => el.addEventListener('input', calcBlender));
-document.querySelectorAll('#topoff input').forEach(el => el.addEventListener('input', calcTopoff));
-calcBlender(); calcTopoff();
+// === UNIT TOGGLES ===
+setupToggle('units1', u => {
+  if (u === units1) return;
+  convertFields(['b-cur-psi','b-tgt-psi'], ['pressure','pressure'], u);
+  convertFields(['b-depth'], ['depth'], u);
+  units1 = u;
+  calcBlender();
+});
+
+setupToggle('units2', u => {
+  if (u === units2) return;
+  convertFields(['t-cur-psi','t-tgt-psi'], ['pressure','pressure'], u);
+  convertFields(['t-depth'], ['depth'], u);
+  units2 = u;
+  calcTopoff();
+});
+
+// === INPUT WIRING ===
+// Blender pressure inputs
+['b-cur-psi','b-tgt-psi'].forEach(id => {
+  $(id).addEventListener('input', () => { onPressureInput(id, units1); calcBlender(); });
+});
+$('b-depth').addEventListener('input', () => { onDepthInput('b-depth', units1); calcBlender(); });
+// Blender gas % inputs
+['b-cur-o2','b-cur-he','b-tgt-o2','b-tgt-he','b-top-o2','b-top-he'].forEach(id => {
+  $(id).addEventListener('input', calcBlender);
+});
+
+// Topoff pressure inputs
+['t-cur-psi','t-tgt-psi'].forEach(id => {
+  $(id).addEventListener('input', () => { onPressureInput(id, units2); calcTopoff(); });
+});
+$('t-depth').addEventListener('input', () => { onDepthInput('t-depth', units2); calcTopoff(); });
+// Topoff gas % inputs
+['t-cur-o2','t-cur-he','t-fill-o2','t-fill-he'].forEach(id => {
+  $(id).addEventListener('input', calcTopoff);
+});
+
+// === MOD / BEST MIX ===
+function calcModMix() {
+  const pu = units3, df = dfact(units3), du = dunit(units3);
+  document.querySelectorAll('.m-du').forEach(el => el.textContent = du);
+
+  const o2 = val('m-o2'), he = val('m-he');
+  const depthFt = readFt('m-depth');
+  const endTargetFt = readFt('m-end-target');
+
+  $('m-n2').textContent = (100 - o2 - he).toFixed(1);
+
+  const fO2 = o2/100, fHe = he/100;
+
+  // MOD at various ppO2
+  [1.2, 1.3, 1.4, 1.6].forEach(pp => {
+    const modFt = fO2 > 0 ? ((pp/fO2)-1)*33 : 0;
+    const modDisplay = showDepth(modFt, pu);
+    const endFt = ((1-fHe)*(modFt+33)/33-1)*33;
+    const endDisplay = showDepth(endFt, pu);
+    const suffix = pp.toFixed(1).replace('.','');
+    $('m-mod' + suffix).textContent = fO2 > 0 ? modDisplay + ' ' + du : '—';
+    $('m-end' + suffix).textContent = fO2 > 0 ? endDisplay + ' ' + du : '—';
+  });
+
+  // Best O2% for depth at various ppO2
+  const depth = depthFt; // internal ft
+  const ata = depth/33 + 1;
+  [1.2, 1.3, 1.4, 1.6].forEach(pp => {
+    const bestO2 = pp / ata * 100;
+    const suffix = pp.toFixed(1).replace('.','');
+    $('m-bo2-' + suffix).textContent = ata > 0 ? bestO2.toFixed(1) + '%' : '—';
+  });
+
+  // He% for target END
+  // END_ft = ((1-fHe)*(depth_ft+33)/33 - 1)*33
+  // Solve: fHe = 1 - (endTargetFt+33)/(depthFt+33)
+  const heNeeded = depthFt > 0 ? (1 - (endTargetFt+33)/(depthFt+33)) * 100 : 0;
+  const heClamp = Math.max(0, Math.min(100, heNeeded));
+  $('m-he-needed').textContent = depthFt > 0 ? heClamp.toFixed(1) + '%' : '—';
+
+  // Recommended mixes: combine best O2 at each ppO2 with the He needed
+  const mixBody = $('m-mixes-body');
+  mixBody.innerHTML = '';
+  if (depthFt <= 0) return;
+
+  [1.2, 1.3, 1.4, 1.6].forEach(pp => {
+    const bestO2 = Math.min(pp / ata * 100, 100);
+    const roundO2 = Math.round(bestO2);
+    const roundHe = Math.round(heClamp);
+    // Skip if O2+He > 100
+    if (roundO2 + roundHe > 100) return;
+
+    const div = document.createElement('div');
+    div.className = 'result-row';
+    const mixLabel = roundHe > 0 ? roundO2 + '/' + roundHe : (roundO2 === 21 ? 'Air' : 'EAN' + roundO2);
+    div.innerHTML =
+      '<span class="result-label" style="color:var(--text-dim)">ppO₂ ' + pp.toFixed(1) + '</span>' +
+      '<span class="result-value" style="color:var(--text);background:var(--surface-raised);padding:0.25rem 0.7rem;border-radius:5px;font-size:1.1rem;">' + mixLabel + '</span>';
+    mixBody.appendChild(div);
+  });
+}
+
+setupToggle('units3', u => {
+  if (u === units3) return;
+  convertFields(['m-depth','m-end-target'], ['depth','depth'], u);
+  units3 = u;
+  calcModMix();
+});
+
+// MOD/Best Mix inputs
+['m-o2','m-he'].forEach(id => {
+  $(id).addEventListener('input', calcModMix);
+});
+$('m-depth').addEventListener('input', () => { onDepthInput('m-depth', units3); calcModMix(); });
+$('m-end-target').addEventListener('input', () => { onDepthInput('m-end-target', units3); calcModMix(); });
+
+// === INIT ===
+// Initialize canonical values from HTML defaults (all in PSI/ft)
+['b-cur-psi','b-tgt-psi'].forEach(id => initCanonical(id, 'pressure'));
+['t-cur-psi','t-tgt-psi'].forEach(id => initCanonical(id, 'pressure'));
+['b-depth','t-depth','m-depth','m-end-target'].forEach(id => initCanonical(id, 'depth'));
+
+calcBlender();
+calcTopoff();
+calcModMix();
 </script>
 </body>
 </html>
