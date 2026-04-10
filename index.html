@@ -252,7 +252,7 @@
     <div class="calc-grid">
       <div class="col">
         <div class="section">
-          <div class="section-header">Current Tank</div>
+          <div class="section-header">Current Cylinder</div>
           <div class="section-body">
             <div class="input-row">
               <span class="input-label">Pressure</span>
@@ -347,7 +347,7 @@
     <div class="calc-grid">
       <div class="col">
         <div class="section">
-          <div class="section-header">Current Tank</div>
+          <div class="section-header">Current Cylinder</div>
           <div class="section-body">
             <div class="input-row"><span class="input-label">Pressure</span><div class="input-wrap"><input type="number" id="t-cur-psi" value="1700" min="0"><span class="input-suffix t-pu">psi</span></div></div>
             <div class="input-row"><span class="input-label o2">O₂ %</span><input type="number" class="o2-input" id="t-cur-o2" value="16" min="0" max="100"></div>
@@ -684,7 +684,7 @@ function calcBlender() {
   $('b-top-n2').textContent = topN2.toFixed(1);
 
   const errors = [];
-  if (curO2+curHe > 100.01) errors.push('Current tank fractions exceed 100%');
+  if (curO2+curHe > 100.01) errors.push('Current cylinder fractions exceed 100%');
   if (tgtO2+tgtHe > 100.01) errors.push('Target mix fractions exceed 100%');
   if (topO2+topHe > 100.01) errors.push('Top-off gas fractions exceed 100%');
   if (tgtP <= 0) errors.push('Target pressure must be > 0');
@@ -807,7 +807,7 @@ function calcTopoff() {
   $('t-cur-n2').textContent = curN2.toFixed(1); $('t-fill-n2').textContent = fillN2.toFixed(1);
 
   const errors = [];
-  if (curO2+curHe > 100.01) errors.push('Current tank fractions exceed 100%');
+  if (curO2+curHe > 100.01) errors.push('Current cylinder fractions exceed 100%');
   if (fillO2+fillHe > 100.01) errors.push('Fill gas fractions exceed 100%');
   if (tgtP <= 0) errors.push('Final pressure must be > 0');
   if (curP > tgtP) errors.push('Current pressure exceeds final pressure');
