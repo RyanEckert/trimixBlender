@@ -1,4 +1,4 @@
-I think this works as intended./n
+I think this works as intended.\n
 Feel free to let me know and I can try to fix any issues.
 
 ☠️ **Don't do anything stupid** ☠️
