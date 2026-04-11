@@ -269,14 +269,14 @@
   .footer-links a:hover { color: var(--text); }
 
   .shared-controls {
-    display: flex; align-items: center; gap: 1.25rem;
+    display: flex; align-items: center; justify-content: space-between;
     margin-bottom: 1.75rem; flex-wrap: wrap;
   }
   .shared-controls .toggle-group {
     display: flex; align-items: center; gap: 0.5rem;
   }
   .shared-controls .toggle-group span {
-    font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;
+    font-size: 1.0rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;
   }
   .banked-row {
     display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0;
@@ -342,18 +342,19 @@
         <button data-unit="bar">BAR</button>
       </div>
     </div>
-    <div class="toggle-group">
-      <span>Gas</span>
-      <div class="toggle" id="global-gas">
-        <button class="active" data-gas="ideal">Ideal</button>
-        <button data-gas="real">Real</button>
+    <div style="display:flex; align-items:center; gap:0.5rem;">
+      <div class="toggle-group">
+        <span>Gas</span>
+        <div class="toggle" id="global-gas">
+          <button class="active" data-gas="ideal">Ideal</button>
+          <button data-gas="real">Real</button>
+        </div>
+      </div>
+      <div class="temp-input" id="global-temp-wrap" style="display:none;">
+        <input type="number" id="global-temp" value="70" min="32" max="120">
+        <span id="global-temp-unit">°F</span>
       </div>
     </div>
-    <div class="temp-input" id="global-temp-wrap" style="display:none;">
-      <input type="number" id="global-temp" value="70" min="32" max="120">
-      <span id="global-temp-unit">°F</span>
-    </div>
-    <span class="z-info" id="global-z-info" style="display:none;"></span>
     <div class="toggle-group">
       <span>O₂</span>
       <div class="toggle" id="global-o2src">
@@ -738,12 +739,12 @@ function calcBlendZ(curPsi, curO2, curHe, tgtPsi, tgtO2, tgtHe, topO2, topHe, o2
   // dnO2Src * (o2SrcN2/100) + dnTop * (topN2/100) = nN2t - nN2s
   // dnO2Src * (o2SrcO2/100) + dnTop * (topO2/100) + dnTop * 0 = nO2t - nO2s (O2 from topoff)
   // Wait, topoff He also contributes. Need to account for all He from topoff too.
-  
+
   // Actually let me simplify. The total mole balance:
   // He:  dnHePure + dnTop*(topHe/100) = nHet - nHes
   // O2:  dnO2Src*(o2SrcO2/100) + dnTop*(topO2/100) = nO2t - nO2s
   // N2:  dnO2Src*(o2SrcN2/100) + dnTop*(topN2/100) = nN2t - nN2s
-  
+
   // From He: dnHePure = (nHet - nHes) - dnTop*(topHe/100)
   // From N2: dnO2Src = (dnN2_need - dnTop*(topN2/100)) / (o2SrcN2/100)
   //   where dnN2_need = nN2t - nN2s
@@ -751,13 +752,13 @@ function calcBlendZ(curPsi, curO2, curHe, tgtPsi, tgtO2, tgtHe, topO2, topHe, o2
   // Solve for dnTop:
   // dnO2_need = dnN2_need * o2SrcO2/o2SrcN2 - dnTop * topN2/100 * o2SrcO2/o2SrcN2 + dnTop * topO2/100
   // dnTop * (topO2/100 - topN2/100 * o2SrcO2/o2SrcN2) = dnO2_need - dnN2_need * o2SrcO2/o2SrcN2
-  
+
   const dnO2_need = nO2t - nO2s;
   const dnN2_need = nN2t - nN2s;
   const dnHe_need = nHet - nHes;
-  
+
   let dnTop, dnO2Src;
-  
+
   if (o2SrcN2 > 0 && topN2 > 0) {
     const ratio = o2SrcO2 / o2SrcN2;
     const denom = topO2/100 - topN2/100 * ratio + topHe/100 * 0; // topHe doesn't affect this eq
@@ -787,7 +788,7 @@ function calcBlendZ(curPsi, curO2, curHe, tgtPsi, tgtO2, tgtHe, topO2, topHe, o2
     dnTop = 0;
     dnO2Src = dnN2_need > 0 ? dnN2_need / (o2SrcN2/100) : 0;
   }
-  
+
   const dnHePureFinal = dnHe_need - dnTop * topHe/100;
 
   const feasible = dnHePureFinal >= -0.5 && dnO2Src >= -0.5 && dnTop >= -0.5;
@@ -910,7 +911,7 @@ function calcBlendBanked(topO2, topHe, topN2, startP, curO2, curHe, curN2, tgtP,
   const ppO2f = tgtO2/100*tgtP, ppHef = tgtHe/100*tgtP, ppN2f = tgtN2/100*tgtP;
   const ppO2h = curO2/100*startP, ppHeh = curHe/100*startP, ppN2h = curN2/100*startP;
   const dnO2 = ppO2f - ppO2h, dnHe = ppHef - ppHeh, dnN2 = ppN2f - ppN2h;
-  
+
   // Solve: S*(o2SrcO2/100) + T*(topO2/100) = dnO2
   //        S*(o2SrcN2/100) + T*(topN2/100) = dnN2
   //        heAdd = dnHe - T*(topHe/100)
@@ -1138,8 +1139,6 @@ function calcBlender() {
       heDisp = hR; o2Disp = oR; topDisp = tR;
       stop1 = Math.round(zr.stop1); stop2 = Math.round(zr.stop2); stop3 = Math.round(zr.stop3);
       hasO2step = zr.o2Gauge > 0.5;
-      $('global-z-info').textContent = 'Z_mix = ' + zr.Z_target.toFixed(4);
-      $('global-z-info').style.display = '';
     } else {
       heDisp = 0; o2Disp = 0; topDisp = 0; stop1 = 0; stop2 = 0; stop3 = 0; hasO2step = false;
     }
@@ -1148,7 +1147,6 @@ function calcBlender() {
     heDisp = heR; o2Disp = o2R; topDisp = topR;
     stop1 = Math.round(startP) + heR; stop2 = stop1 + o2R; stop3 = Math.round(tgtP);
     hasO2step = o2Add > 0.5;
-    $('global-z-info').style.display = 'none';
   }
 
   $('b-add-he').textContent = sp(heDisp);
