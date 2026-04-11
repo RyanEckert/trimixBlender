@@ -334,7 +334,7 @@
 <body>
 <div class="container">
   <header>
-    <h1>Trimix Blender</h1>
+    <h1>Mix It Up!</h1>
     <p id="subtitle">Partial pressure method &middot; He &rarr; O₂ &rarr; Top-off</p>
   </header>
 
@@ -748,12 +748,12 @@ function calcBlendZ(curPsi, curO2, curHe, tgtPsi, tgtO2, tgtHe, topO2, topHe, o2
   // dnO2Src * (o2SrcN2/100) + dnTop * (topN2/100) = nN2t - nN2s
   // dnO2Src * (o2SrcO2/100) + dnTop * (topO2/100) + dnTop * 0 = nO2t - nO2s (O2 from topoff)
   // Wait, topoff He also contributes. Need to account for all He from topoff too.
-  
+
   // Actually let me simplify. The total mole balance:
   // He:  dnHePure + dnTop*(topHe/100) = nHet - nHes
   // O2:  dnO2Src*(o2SrcO2/100) + dnTop*(topO2/100) = nO2t - nO2s
   // N2:  dnO2Src*(o2SrcN2/100) + dnTop*(topN2/100) = nN2t - nN2s
-  
+
   // From He: dnHePure = (nHet - nHes) - dnTop*(topHe/100)
   // From N2: dnO2Src = (dnN2_need - dnTop*(topN2/100)) / (o2SrcN2/100)
   //   where dnN2_need = nN2t - nN2s
@@ -761,13 +761,13 @@ function calcBlendZ(curPsi, curO2, curHe, tgtPsi, tgtO2, tgtHe, topO2, topHe, o2
   // Solve for dnTop:
   // dnO2_need = dnN2_need * o2SrcO2/o2SrcN2 - dnTop * topN2/100 * o2SrcO2/o2SrcN2 + dnTop * topO2/100
   // dnTop * (topO2/100 - topN2/100 * o2SrcO2/o2SrcN2) = dnO2_need - dnN2_need * o2SrcO2/o2SrcN2
-  
+
   const dnO2_need = nO2t - nO2s;
   const dnN2_need = nN2t - nN2s;
   const dnHe_need = nHet - nHes;
-  
+
   let dnTop, dnO2Src;
-  
+
   if (o2SrcN2 > 0 && topN2 > 0) {
     const ratio = o2SrcO2 / o2SrcN2;
     const denom = topO2/100 - topN2/100 * ratio + topHe/100 * 0; // topHe doesn't affect this eq
@@ -797,7 +797,7 @@ function calcBlendZ(curPsi, curO2, curHe, tgtPsi, tgtO2, tgtHe, topO2, topHe, o2
     dnTop = 0;
     dnO2Src = dnN2_need > 0 ? dnN2_need / (o2SrcN2/100) : 0;
   }
-  
+
   const dnHePureFinal = dnHe_need - dnTop * topHe/100;
 
   const feasible = dnHePureFinal >= -0.5 && dnO2Src >= -0.5 && dnTop >= -0.5;
@@ -883,16 +883,24 @@ function topoffName(o2, he) {
 }
 
 // === TABS ===
+const titles = {
+  blender: 'Mix It Up!',
+  topoff: 'Top It Off!',
+  modmix: 'Know Your Limits!'
+};
+
 const subtitles = {
   blender: 'Partial pressure method \u00b7 He \u2192 O\u2082 \u2192 Top-off',
   topoff: 'What mix do I get if I boost with a known gas?',
   modmix: 'Maximum operating depth \u00b7 Optimal gas selection'
 };
+
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     tab.classList.add('active'); $(tab.dataset.tab).classList.add('active');
+    document.querySelector('header h1').textContent = titles[tab.dataset.tab] || 'Trimix Blender';
     $('subtitle').textContent = subtitles[tab.dataset.tab] || '';
   });
 });
@@ -920,7 +928,7 @@ function calcBlendBanked(topO2, topHe, topN2, startP, curO2, curHe, curN2, tgtP,
   const ppO2f = tgtO2/100*tgtP, ppHef = tgtHe/100*tgtP, ppN2f = tgtN2/100*tgtP;
   const ppO2h = curO2/100*startP, ppHeh = curHe/100*startP, ppN2h = curN2/100*startP;
   const dnO2 = ppO2f - ppO2h, dnHe = ppHef - ppHeh, dnN2 = ppN2f - ppN2h;
-  
+
   // Solve: S*(o2SrcO2/100) + T*(topO2/100) = dnO2
   //        S*(o2SrcN2/100) + T*(topN2/100) = dnN2
   //        heAdd = dnHe - T*(topHe/100)
