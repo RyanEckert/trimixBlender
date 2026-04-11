@@ -267,6 +267,63 @@
     display: flex; align-items: center;
   }
   .footer-links a:hover { color: var(--text); }
+
+  .shared-controls {
+    display: flex; align-items: center; gap: 1.25rem;
+    margin-bottom: 1.75rem; flex-wrap: wrap;
+  }
+  .shared-controls .toggle-group {
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .shared-controls .toggle-group span {
+    font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .banked-row {
+    display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0;
+    border-top: 1px solid var(--border);
+  }
+  .banked-toggle {
+    display: flex; align-items: center; gap: 0.35rem; cursor: pointer;
+  }
+  .banked-toggle input[type="checkbox"] {
+    appearance: none; -webkit-appearance: none;
+    width: 16px; height: 16px; border-radius: 3px;
+    border: 2px solid var(--border); background: var(--surface);
+    cursor: pointer; position: relative; flex-shrink: 0;
+  }
+  .banked-toggle input[type="checkbox"]:checked {
+    background: var(--o2-color); border-color: var(--o2-color);
+  }
+  .banked-toggle input[type="checkbox"]:checked::after {
+    content: '✓'; position: absolute; top: -2px; left: 1px;
+    font-size: 12px; color: var(--bg); font-weight: 700;
+  }
+  .banked-toggle label {
+    font-size: 0.8rem; color: var(--text-dim); cursor: pointer;
+  }
+  .banked-pct-input {
+    width: 52px; padding: 0.25rem 0.4rem;
+    font-family: var(--mono); font-size: 0.9rem; font-weight: 500;
+    color: var(--o2-color); background: var(--surface);
+    border: 1px solid var(--border); border-radius: 4px;
+    text-align: right; outline: none;
+  }
+  .banked-pct-input:focus { border-color: var(--o2-color); }
+  .reverse-result {
+    text-align: center; padding: 1rem 0;
+  }
+  .reverse-mix {
+    font-family: var(--mono); font-size: 2rem; font-weight: 700;
+    color: var(--text);
+  }
+  .reverse-detail {
+    font-family: var(--mono); font-size: 0.9rem; color: var(--text-dim);
+    margin-top: 0.4rem;
+  }
+  .reverse-error {
+    font-family: var(--mono); font-size: 0.9rem; font-weight: 600;
+    color: var(--err-color); text-align: center; padding: 0.75rem 0;
+  }
 </style>
 </head>
 <body>
@@ -276,6 +333,39 @@
     <p id="subtitle">Partial pressure method &middot; He &rarr; O₂ &rarr; Top-off</p>
   </header>
 
+
+  <div class="shared-controls">
+    <div class="toggle-group">
+      <span>Units</span>
+      <div class="toggle" id="global-units">
+        <button class="active" data-unit="psi">PSI</button>
+        <button data-unit="bar">BAR</button>
+      </div>
+    </div>
+    <div class="toggle-group">
+      <span>Gas</span>
+      <div class="toggle" id="global-gas">
+        <button class="active" data-gas="ideal">Ideal</button>
+        <button data-gas="real">Real</button>
+      </div>
+    </div>
+    <div class="temp-input" id="global-temp-wrap" style="display:none;">
+      <input type="number" id="global-temp" value="70" min="32" max="120">
+      <span id="global-temp-unit">°F</span>
+    </div>
+    <span class="z-info" id="global-z-info" style="display:none;"></span>
+    <div class="toggle-group">
+      <span>O₂</span>
+      <div class="toggle" id="global-o2src">
+        <button class="active" data-o2="pure">Pure</button>
+        <button data-o2="banked">Banked</button>
+      </div>
+    </div>
+    <div class="temp-input" id="banked-pct-wrap" style="display:none;">
+      <input type="number" id="b-banked-o2" value="36" min="21" max="100" style="color:var(--o2-color);">
+      <span style="color:var(--o2-color);">%</span>
+    </div>
+  </div>
   <div class="tabs">
     <button class="tab active" data-tab="blender">Blending Calculator</button>
     <button class="tab" data-tab="topoff">Top-Off Calculator</button>
@@ -284,24 +374,7 @@
 
   <!-- ==================== BLENDER ==================== -->
   <div id="blender" class="tab-content active">
-    <div class="units-bar">
-      <span>Units</span>
-      <div class="toggle" id="units1">
-        <button class="active" data-unit="psi">PSI</button>
-        <button data-unit="bar">BAR</button>
-      </div>
-    </div>
-    <div class="z-bar">
-      <div class="z-toggle">
-        <input type="checkbox" id="b-z-enable">
-        <label for="b-z-enable">Z-factor correction <span class="z-label-detail">(real gas)</span></label>
-      </div>
-      <div class="temp-input" id="b-temp-wrap" style="display:none;">
-        <input type="number" id="b-temp" value="70" min="32" max="120">
-        <span id="b-temp-unit">°F</span>
-      </div>
-      <span class="z-info" id="b-z-info" style="display:none;"></span>
-    </div>
+
     <div class="calc-grid">
       <div class="col">
         <div class="section">
@@ -389,24 +462,7 @@
 
   <!-- ==================== TOP-OFF ==================== -->
   <div id="topoff" class="tab-content">
-    <div class="units-bar">
-      <span>Units</span>
-      <div class="toggle" id="units2">
-        <button class="active" data-unit="psi">PSI</button>
-        <button data-unit="bar">BAR</button>
-      </div>
-    </div>
-    <div class="z-bar">
-      <div class="z-toggle">
-        <input type="checkbox" id="t-z-enable">
-        <label for="t-z-enable">Z-factor correction <span class="z-label-detail">(real gas)</span></label>
-      </div>
-      <div class="temp-input" id="t-temp-wrap" style="display:none;">
-        <input type="number" id="t-temp" value="70" min="32" max="120">
-        <span id="t-temp-unit">°F</span>
-      </div>
-      <span class="z-info" id="t-z-info" style="display:none;"></span>
-    </div>
+
     <div class="error-banner" id="t-error"></div>
     <div class="calc-grid">
       <div class="col">
@@ -464,19 +520,25 @@
             <div class="dive-row"><span class="dive-label">MOD @ ppO₂ 1.6</span><span class="dive-value" id="t-mod16">—</span></div>
           </div>
         </div>
+        <div class="section">
+          <div class="section-header">What Gas Do I Need?</div>
+          <div class="section-body">
+            <div class="input-row">
+              <span class="input-label">Target Pressure</span>
+              <div class="input-wrap"><input type="number" id="r-tgt-psi" value="3000" min="0"><span class="input-suffix g-pu">psi</span></div>
+            </div>
+            <div class="input-row"><span class="input-label o2">Target O₂ %</span><input type="number" class="o2-input" id="r-tgt-o2" value="21" min="0" max="100"></div>
+            <div class="input-row"><span class="input-label he">Target He %</span><input type="number" class="he-input" id="r-tgt-he" value="35" min="0" max="100"></div>
+            <div id="r-result"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- ==================== MOD / BEST MIX ==================== -->
   <div id="modmix" class="tab-content">
-    <div class="units-bar">
-      <span>Units</span>
-      <div class="toggle" id="units3">
-        <button class="active" data-unit="psi">PSI</button>
-        <button data-unit="bar">BAR</button>
-      </div>
-    </div>
+
     <div class="calc-grid">
       <div class="col">
         <!-- MOD Calculator -->
@@ -573,7 +635,7 @@
       <a href="https://scholar.google.com/citations?user=cogphLkAAAAJ&hl=en" target="_blank" rel="noopener" title="Google Scholar" aria-label="Google Scholar">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M5.242 13.769L0 9.5 12 0l12 9.5-5.242 4.269C17.548 11.249 14.978 9.5 12 9.5c-2.977 0-5.548 1.748-6.758 4.269zM12 10a7 7 0 1 0 0 14 7 7 0 0 0 0-14z"/></svg>
       </a>
-      <a href="mailto:ryan.j.eckert@gmail.com" title="Email" aria-label="Email">
+      <a href="/cdn-cgi/l/email-protection#ef9d968e81c185c18a8c848a9d9baf88828e8683c18c8082" title="Email" aria-label="Email">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 4L12 13 2 4"/></svg>
       </a>
     </div>
@@ -581,7 +643,7 @@
   </footer>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const PSI_TO_BAR = 0.0689476;
 const FT_TO_M = 0.3048;
 
@@ -600,33 +662,33 @@ function roundConsistent(values) {
   return result;
 }
 
-let units1 = 'psi', units2 = 'psi', units3 = 'psi';
-const dfact = u => u === 'psi' ? 33 : 10;
-const dunit = u => u === 'psi' ? 'fsw' : 'msw';
+// === SHARED STATE ===
+let globalUnit = 'psi';
+let globalGasModel = 'ideal';
+let globalO2Src = 'pure'; // 'ideal' or 'real'
 
-// === Z-FACTOR SYSTEM ===
-// Polynomial fits from NIST data. P in PSI, T in Kelvin.
-// Z(P,T) = 1 + [a1*P + a2*P²] * (T_ref/T)^n
-const T_REF = 294.26; // 70°F in Kelvin
+const dfact = () => globalUnit === 'psi' ? 33 : 10;
+const dunit = () => globalUnit === 'psi' ? 'fsw' : 'msw';
+
+// === Z-FACTOR SYSTEM (NIST-fitted polynomials) ===
+const T_REF = 294.26;
 
 function Z_he(P, T) {
-  return 1 + (3.299e-5 * P + (-2.314e-10) * P * P) * Math.pow(T_REF / T, 0.2);
+  return 1 + (1.7291e-05 * P + 1.9793e-10 * P * P) * Math.pow(T_REF / T, 0.2);
 }
 function Z_o2(P, T) {
-  return 1 + (-3.775e-5 * P + 7.172e-9 * P * P) * Math.pow(T_REF / T, 1.0);
+  return 1 + (-2.7446e-05 * P + 2.4201e-09 * P * P) * Math.pow(T_REF / T, 1.0);
 }
 function Z_n2(P, T) {
-  return 1 + (-1.962e-5 * P + 6.402e-9 * P * P) * Math.pow(T_REF / T, 0.9);
+  return 1 + (-1.2919e-05 * P + 2.5583e-09 * P * P) * Math.pow(T_REF / T, 0.9);
 }
 function Zmix(P, T, fO2, fHe, fN2) {
   if (P <= 0) return 1;
   return fO2 * Z_o2(P, T) + fHe * Z_he(P, T) + fN2 * Z_n2(P, T);
 }
-// Solve P given "real moles" A, composition, temp
-// P / Zmix(P, T, y) = A → P = A * Zmix(P)
 function solveP(A, T, fO2, fHe, fN2) {
   if (A <= 0) return 0;
-  let P = A; // ideal starting guess
+  let P = A;
   for (let i = 0; i < 50; i++) {
     const Z = Zmix(P, T, fO2, fHe, fN2);
     const P_new = A * Z;
@@ -636,164 +698,170 @@ function solveP(A, T, fO2, fHe, fN2) {
   return P;
 }
 
-// Z-corrected blending: returns gauge pressures for fill steps
-function calcBlendZ(curPsi, curO2, curHe, tgtPsi, tgtO2, tgtHe, topO2, topHe, T) {
-  const curN2 = 100 - curO2 - curHe, tgtN2 = 100 - tgtO2 - tgtHe;
-  const topN2 = 100 - topO2 - topHe;
+function isRealGas() { return globalGasModel === 'real'; }
+
+function getGlobalTempK() {
+  const v = parseFloat($('global-temp').value) || 70;
+  return globalUnit === 'psi' ? (v - 32) * 5/9 + 273.15 : v + 273.15;
+}
+
+// Z-corrected blending
+function calcBlendZ(curPsi, curO2, curHe, tgtPsi, tgtO2, tgtHe, topO2, topHe, o2SrcO2, T) {
+  const curN2 = 100-curO2-curHe, tgtN2 = 100-tgtO2-tgtHe;
+  const topN2 = 100-topO2-topHe;
+  const o2SrcN2 = 100 - o2SrcO2; // banked O2 source (no He)
 
   const Z_s = curPsi > 0 ? Zmix(curPsi, T, curO2/100, curHe/100, curN2/100) : 1;
   const Z_t = Zmix(tgtPsi, T, tgtO2/100, tgtHe/100, tgtN2/100);
   const A_s = curPsi / Z_s;
   const A_t = tgtPsi / Z_t;
 
-  // Component moles (proportional)
-  const nO2s = curO2/100 * A_s, nHes = curHe/100 * A_s, nN2s = curN2/100 * A_s;
-  const nO2t = tgtO2/100 * A_t, nHet = tgtHe/100 * A_t, nN2t = tgtN2/100 * A_t;
+  const nO2s = curO2/100*A_s, nHes = curHe/100*A_s, nN2s = curN2/100*A_s;
+  const nO2t = tgtO2/100*A_t, nHet = tgtHe/100*A_t, nN2t = tgtN2/100*A_t;
 
-  // Moles to add
-  const dnN2 = nN2t - nN2s;
-  let dnTop, dnO2top, dnHetop;
-  if (topN2 > 0) {
-    dnTop = dnN2 / (topN2/100);
-    dnO2top = topO2/100 * dnTop;
-    dnHetop = topHe/100 * dnTop;
+  // He is always pure
+  const dnHePure = nHet - nHes;
+
+  // Remaining after He: need O2 and N2
+  // O2 source contributes: o2SrcO2% O2 + o2SrcN2% N2
+  // Topoff contributes: topO2% O2 + topHe% He + topN2% N2
+  // But topoff also contributes He which we already accounted for... no.
+  // Fill order: He (pure) → O2 source (banked mix) → Topoff
+  // Topoff fixes N2. O2 source provides O2 + some N2.
+
+  // After He and before topoff:
+  // n_N2 needed from topoff + O2source = nN2t - nN2s
+  // n_O2 needed from topoff + O2source = nO2t - nO2s
+  // He from topoff: topHe/100 * dnTop — but we already have all He from pure step
+  // Actually topoff CAN have He (like 16/50 topoff). So:
+  // dnTop fixes N2 contribution after accounting for N2 from O2 source
+  // dnO2Src * (o2SrcN2/100) + dnTop * (topN2/100) = nN2t - nN2s
+  // dnO2Src * (o2SrcO2/100) + dnTop * (topO2/100) + dnTop * 0 = nO2t - nO2s (O2 from topoff)
+  // Wait, topoff He also contributes. Need to account for all He from topoff too.
+  
+  // Actually let me simplify. The total mole balance:
+  // He:  dnHePure + dnTop*(topHe/100) = nHet - nHes
+  // O2:  dnO2Src*(o2SrcO2/100) + dnTop*(topO2/100) = nO2t - nO2s
+  // N2:  dnO2Src*(o2SrcN2/100) + dnTop*(topN2/100) = nN2t - nN2s
+  
+  // From He: dnHePure = (nHet - nHes) - dnTop*(topHe/100)
+  // From N2: dnO2Src = (dnN2_need - dnTop*(topN2/100)) / (o2SrcN2/100)
+  //   where dnN2_need = nN2t - nN2s
+  // Sub into O2: ((dnN2_need - dnTop*topN2/100)/(o2SrcN2/100)) * o2SrcO2/100 + dnTop*topO2/100 = dnO2_need
+  // Solve for dnTop:
+  // dnO2_need = dnN2_need * o2SrcO2/o2SrcN2 - dnTop * topN2/100 * o2SrcO2/o2SrcN2 + dnTop * topO2/100
+  // dnTop * (topO2/100 - topN2/100 * o2SrcO2/o2SrcN2) = dnO2_need - dnN2_need * o2SrcO2/o2SrcN2
+  
+  const dnO2_need = nO2t - nO2s;
+  const dnN2_need = nN2t - nN2s;
+  const dnHe_need = nHet - nHes;
+  
+  let dnTop, dnO2Src;
+  
+  if (o2SrcN2 > 0 && topN2 > 0) {
+    const ratio = o2SrcO2 / o2SrcN2;
+    const denom = topO2/100 - topN2/100 * ratio + topHe/100 * 0; // topHe doesn't affect this eq
+    // Actually let me redo this properly with 3 equations 3 unknowns
+    // Let H = dnHePure, S = dnO2Src, T = dnTop
+    // H + T*(topHe/100) = dnHe_need   → H = dnHe_need - T*topHe/100
+    // S*(o2SrcO2/100) + T*(topO2/100) = dnO2_need
+    // S*(o2SrcN2/100) + T*(topN2/100) = dnN2_need
+    // From eq3: S = (dnN2_need - T*topN2/100) / (o2SrcN2/100)
+    // Sub into eq2:
+    // (dnN2_need - T*topN2/100) * (o2SrcO2/o2SrcN2) + T*topO2/100 = dnO2_need
+    // T * (topO2/100 - topN2/100 * o2SrcO2/o2SrcN2) = dnO2_need - dnN2_need * o2SrcO2/o2SrcN2
+    const coeff = topO2/100 - topN2/100 * (o2SrcO2/o2SrcN2);
+    const rhs = dnO2_need - dnN2_need * (o2SrcO2/o2SrcN2);
+    dnTop = Math.abs(coeff) > 0.0001 ? rhs / coeff : 0;
+    dnO2Src = o2SrcN2 > 0 ? (dnN2_need - dnTop * topN2/100) / (o2SrcN2/100) : 0;
+  } else if (o2SrcN2 <= 0) {
+    // Pure O2 source (no N2)
+    if (topN2 > 0) {
+      dnTop = dnN2_need / (topN2/100);
+    } else {
+      dnTop = 0;
+    }
+    dnO2Src = dnO2_need - dnTop * topO2/100;
+    if (o2SrcO2 > 0) dnO2Src = dnO2Src / (o2SrcO2/100);
   } else {
-    dnTop = 0; dnO2top = 0; dnHetop = 0;
+    dnTop = 0;
+    dnO2Src = dnN2_need > 0 ? dnN2_need / (o2SrcN2/100) : 0;
   }
-  const dnHePure = (nHet - nHes) - dnHetop;
-  const dnO2Pure = (nO2t - nO2s) - dnO2top;
+  
+  const dnHePureFinal = dnHe_need - dnTop * topHe/100;
 
-  // Feasibility
-  const feasible = dnHePure >= -0.5 && dnO2Pure >= -0.5 && dnTop >= -0.5;
+  const feasible = dnHePureFinal >= -0.5 && dnO2Src >= -0.5 && dnTop >= -0.5;
+  if (!feasible) return { feasible: false, dnHePure: dnHePureFinal, dnO2Pure: dnO2Src, dnTop };
 
-  if (!feasible) {
-    return { feasible: false, dnHePure, dnO2Pure, dnTop };
-  }
-
-  // Step 1: after adding pure He
-  const n1 = A_s + dnHePure;
-  const f1He = (nHes + dnHePure) / n1, f1O2 = nO2s / n1, f1N2 = nN2s / n1;
+  // Gauge stops
+  // Step 1: pure He
+  const n1 = A_s + dnHePureFinal;
+  const f1He = (nHes+dnHePureFinal)/n1, f1O2 = nO2s/n1, f1N2 = nN2s/n1;
   const P1 = solveP(n1, T, f1O2, f1He, f1N2);
 
-  // Step 2: after adding pure O₂
+  // Step 2: O2 source (banked mix)
   let P2 = P1;
-  if (dnO2Pure > 0.5) {
-    const n2 = n1 + dnO2Pure;
-    const f2O2 = (nO2s + dnO2Pure) / n2, f2He = (nHes + dnHePure) / n2, f2N2 = nN2s / n2;
+  if (dnO2Src > 0.5) {
+    const n2 = n1 + dnO2Src;
+    const f2O2 = (nO2s + dnO2Src*o2SrcO2/100) / n2;
+    const f2He = (nHes + dnHePureFinal) / n2;
+    const f2N2 = (nN2s + dnO2Src*o2SrcN2/100) / n2;
     P2 = solveP(n2, T, f2O2, f2He, f2N2);
   }
 
-  // Step 3: target pressure
-  const P3 = tgtPsi;
-
   return {
     feasible: true,
-    heGauge: P1 - curPsi,
-    o2Gauge: P2 - P1,
-    topGauge: P3 - P2,
-    stop1: P1, stop2: P2, stop3: P3,
+    heGauge: P1 - curPsi, o2Gauge: P2 - P1, topGauge: tgtPsi - P2,
+    stop1: P1, stop2: P2, stop3: tgtPsi,
     Z_start: Z_s, Z_target: Z_t,
-    dnHePure, dnO2Pure, dnTop,
+    dnHePure: dnHePureFinal, dnO2Pure: dnO2Src, dnTop,
   };
 }
 
-// Z-corrected topoff result: what mix do you get?
+// Z-corrected topoff
 function calcTopoffZ(curPsi, curO2, curHe, fillO2, fillHe, tgtPsi, T) {
-  const curN2 = 100 - curO2 - curHe, fillN2 = 100 - fillO2 - fillHe;
-
+  const curN2 = 100-curO2-curHe, fillN2 = 100-fillO2-fillHe;
   const Z_cur = curPsi > 0 ? Zmix(curPsi, T, curO2/100, curHe/100, curN2/100) : 1;
   const A_cur = curPsi / Z_cur;
-
-  // We need to find the final mix. The fill gas is added at tgtPsi.
-  // Total moles at final state = tgtPsi / Z_final, but Z_final depends on final composition.
-  // Iterate: guess composition → calc Z_final → calc moles → calc composition → repeat
-
-  // Start with ideal guess
   const added_ideal = tgtPsi - curPsi;
-  let resO2 = (curO2/100*curPsi + fillO2/100*added_ideal) / tgtPsi * 100;
-  let resHe = (curHe/100*curPsi + fillHe/100*added_ideal) / tgtPsi * 100;
-  let resN2 = 100 - resO2 - resHe;
-
-  // Iterate
+  let resO2 = tgtPsi > 0 ? (curO2/100*curPsi + fillO2/100*added_ideal)/tgtPsi*100 : 0;
+  let resHe = tgtPsi > 0 ? (curHe/100*curPsi + fillHe/100*added_ideal)/tgtPsi*100 : 0;
+  let resN2 = 100-resO2-resHe;
   for (let i = 0; i < 20; i++) {
     const Z_final = Zmix(tgtPsi, T, resO2/100, resHe/100, resN2/100);
     const A_final = tgtPsi / Z_final;
     const A_added = A_final - A_cur;
-
-    const nO2 = curO2/100 * A_cur + fillO2/100 * A_added;
-    const nHe = curHe/100 * A_cur + fillHe/100 * A_added;
-    const nTotal = A_final;
-
-    const newO2 = nO2 / nTotal * 100;
-    const newHe = nHe / nTotal * 100;
-
-    if (Math.abs(newO2 - resO2) < 0.001 && Math.abs(newHe - resHe) < 0.001) break;
-    resO2 = newO2; resHe = newHe; resN2 = 100 - resO2 - resHe;
+    const nO2 = curO2/100*A_cur + fillO2/100*A_added;
+    const nHe = curHe/100*A_cur + fillHe/100*A_added;
+    const newO2 = nO2/A_final*100, newHe = nHe/A_final*100;
+    if (Math.abs(newO2-resO2) < 0.001 && Math.abs(newHe-resHe) < 0.001) break;
+    resO2 = newO2; resHe = newHe; resN2 = 100-resO2-resHe;
   }
-
-  return { resO2, resHe, resN2: 100 - resO2 - resHe };
-}
-
-function getTempK(inputId, unit) {
-  const v = parseFloat($(inputId).value) || 70;
-  // psi mode = °F, bar mode = °C
-  return unit === 'psi' ? (v - 32) * 5/9 + 273.15 : v + 273.15;
+  return { resO2, resHe, resN2: 100-resO2-resHe };
 }
 
 // === CANONICAL VALUE SYSTEM ===
-// Each pressure/depth input stores its true PSI/ft value in data-canonical.
-// Display is derived from canonical. User edits update canonical immediately.
-
 function initCanonical(id, type) {
-  const el = $(id);
-  // type: 'pressure' or 'depth'
-  el.dataset.canonical = el.value || '0';
-  el.dataset.canonType = type;
+  const el = $(id); el.dataset.canonical = el.value || '0'; el.dataset.canonType = type;
 }
-
-function getCanonical(id) {
-  return parseFloat($(id).dataset.canonical || $(id).value || 0);
-}
-
-function setCanonical(id, val) {
-  $(id).dataset.canonical = val;
-}
-
-// Read canonical PSI value
+function getCanonical(id) { return parseFloat($(id).dataset.canonical || $(id).value || 0); }
+function setCanonical(id, val) { $(id).dataset.canonical = val; }
 function readPsi(id) { return getCanonical(id); }
-
-// Read canonical depth in feet
 function readFt(id) { return getCanonical(id); }
-
-// Display a PSI value in current units
 function showPressure(psi, unit) { return Math.round(unit === 'bar' ? psi * PSI_TO_BAR : psi); }
-
-// Display a ft value in current units
 function showDepth(ft, unit) { return Math.round(unit === 'bar' ? ft * FT_TO_M : ft); }
-
-// When user types in a pressure field, update canonical
-function onPressureInput(id, unit) {
+function onPressureInput(id) {
   const displayed = parseFloat($(id).value || 0);
-  const psi = unit === 'bar' ? displayed / PSI_TO_BAR : displayed;
-  setCanonical(id, psi);
+  setCanonical(id, globalUnit === 'bar' ? displayed / PSI_TO_BAR : displayed);
 }
-
-// When user types in a depth field, update canonical
-function onDepthInput(id, unit) {
+function onDepthInput(id) {
   const displayed = parseFloat($(id).value || 0);
-  const ft = unit === 'bar' ? displayed / FT_TO_M : displayed;
-  setCanonical(id, ft);
+  setCanonical(id, globalUnit === 'bar' ? displayed / FT_TO_M : displayed);
 }
-
-// On unit toggle, re-display all fields from canonical
 function convertFields(ids, types, newUnit) {
   ids.forEach((id, i) => {
     const canon = getCanonical(id);
-    if (types[i] === 'pressure') {
-      $(id).value = showPressure(canon, newUnit);
-    } else {
-      $(id).value = showDepth(canon, newUnit);
-    }
+    $(id).value = types[i] === 'pressure' ? showPressure(canon, newUnit) : showDepth(canon, newUnit);
   });
 }
 
@@ -810,7 +878,6 @@ const subtitles = {
   topoff: 'What mix do I get if I boost with a known gas?',
   modmix: 'Maximum operating depth \u00b7 Optimal gas selection'
 };
-
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -824,12 +891,12 @@ function setupToggle(id, cb) {
   document.getElementById(id).querySelectorAll('button').forEach(btn => {
     btn.addEventListener('click', () => {
       btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active'); cb(btn.dataset.unit);
+      btn.classList.add('active'); cb(btn.dataset.unit || btn.dataset.gas || btn.dataset.o2);
     });
   });
 }
 
-// === CORE MATH ===
+// === CORE IDEAL GAS MATH ===
 function calcBlend(topO2, topHe, topN2, startP, curO2, curHe, curN2, tgtP, tgtO2, tgtHe, tgtN2) {
   const ppO2f = tgtO2/100*tgtP, ppHef = tgtHe/100*tgtP, ppN2f = tgtN2/100*tgtP;
   const ppO2h = curO2/100*startP, ppHeh = curHe/100*startP, ppN2h = curN2/100*startP;
@@ -837,14 +904,41 @@ function calcBlend(topO2, topHe, topN2, startP, curO2, curHe, curN2, tgtP, tgtO2
   return { heAdd: ppHef - ppHeh - topPsi*topHe/100, o2Add: ppO2f - ppO2h - topPsi*topO2/100, topPsi };
 }
 
+function calcBlendBanked(topO2, topHe, topN2, startP, curO2, curHe, curN2, tgtP, tgtO2, tgtHe, tgtN2, o2SrcO2) {
+  // 3-gas fill: He (pure) + O2 source (banked mix) + Topoff
+  const o2SrcN2 = 100 - o2SrcO2;
+  const ppO2f = tgtO2/100*tgtP, ppHef = tgtHe/100*tgtP, ppN2f = tgtN2/100*tgtP;
+  const ppO2h = curO2/100*startP, ppHeh = curHe/100*startP, ppN2h = curN2/100*startP;
+  const dnO2 = ppO2f - ppO2h, dnHe = ppHef - ppHeh, dnN2 = ppN2f - ppN2h;
+  
+  // Solve: S*(o2SrcO2/100) + T*(topO2/100) = dnO2
+  //        S*(o2SrcN2/100) + T*(topN2/100) = dnN2
+  //        heAdd = dnHe - T*(topHe/100)
+  let topPsi, o2Src;
+  if (o2SrcN2 > 0 && topN2 > 0) {
+    const ratio = o2SrcO2/o2SrcN2;
+    const coeff = topO2/100 - topN2/100*ratio;
+    const rhs = dnO2 - dnN2*ratio;
+    topPsi = Math.abs(coeff) > 0.0001 ? rhs/coeff : 0;
+    o2Src = (dnN2 - topPsi*topN2/100) / (o2SrcN2/100);
+  } else if (o2SrcN2 <= 0) {
+    topPsi = topN2 > 0 ? dnN2/(topN2/100) : 0;
+    o2Src = (dnO2 - topPsi*topO2/100) / (o2SrcO2/100);
+  } else {
+    topPsi = 0; o2Src = dnN2 > 0 ? dnN2/(o2SrcN2/100) : 0;
+  }
+  const heAdd = dnHe - topPsi*topHe/100;
+  return { heAdd, o2Add: o2Src, topPsi };
+}
+
 function calcDrainTo(topO2, topHe, topN2, curO2, curHe, curN2, tgtP, tgtO2, tgtHe, tgtN2) {
   const cTop = curN2 > 0 ? tgtN2*tgtP/curN2 : 99999;
   let cHe, cO2;
   if (topN2 > 0) {
     const hd = curHe - topHe*curN2/topN2;
-    cHe = Math.abs(hd) > 0.01 ? tgtP*(tgtHe - topHe*tgtN2/topN2)/hd : 99999;
+    cHe = Math.abs(hd) > 0.01 ? tgtP*(tgtHe-topHe*tgtN2/topN2)/hd : 99999;
     const od = curO2 - topO2*curN2/topN2;
-    cO2 = Math.abs(od) > 0.01 ? tgtP*(tgtO2 - topO2*tgtN2/topN2)/od : 99999;
+    cO2 = Math.abs(od) > 0.01 ? tgtP*(tgtO2-topO2*tgtN2/topN2)/od : 99999;
   } else {
     cHe = curHe > 0 ? tgtHe*tgtP/curHe : 99999;
     cO2 = curO2 > 0 ? tgtO2*tgtP/curO2 : 99999;
@@ -853,15 +947,15 @@ function calcDrainTo(topO2, topHe, topN2, curO2, curHe, curN2, tgtP, tgtO2, tgtH
 }
 
 function bestMix(topO2, topHe, topN2, curP, curO2, curHe, curN2, tgtP, tgtHe) {
-  const ppHe_want = tgtHe/100 * tgtP, ppHe_have = curHe/100 * curP;
+  const ppHe_want = tgtHe/100*tgtP, ppHe_have = curHe/100*curP;
   const heAdd = ppHe_want - ppHe_have;
   if (heAdd < 0) {
-    const remaining = tgtP - curP;
-    return { o2: (curO2/100*curP + topO2/100*remaining)/tgtP*100, he: (curHe/100*curP + topHe/100*remaining)/tgtP*100 };
+    const remaining = tgtP-curP;
+    return { o2: (curO2/100*curP+topO2/100*remaining)/tgtP*100, he: (curHe/100*curP+topHe/100*remaining)/tgtP*100 };
   }
-  const topoffPsi = tgtP - curP - heAdd;
+  const topoffPsi = tgtP-curP-heAdd;
   if (topoffPsi < 0) return { o2: (curO2/100*curP)/tgtP*100, he: tgtHe };
-  return { o2: (curO2/100*curP + topO2/100*topoffPsi)/tgtP*100, he: (curHe/100*curP + heAdd + topHe/100*topoffPsi)/tgtP*100 };
+  return { o2: (curO2/100*curP+topO2/100*topoffPsi)/tgtP*100, he: (curHe/100*curP+heAdd+topHe/100*topoffPsi)/tgtP*100 };
 }
 
 function diveData(fO2, fHe, depthFt, unit) {
@@ -871,25 +965,80 @@ function diveData(fO2, fHe, depthFt, unit) {
   return {
     ppo2: (fO2*(depthFt/33+1)).toFixed(2),
     end: fmt(((1-fHe)*(depth+df)/df-1)*df) + ' ' + du,
-    mod12: fO2 > 0 ? fmt(((1.2/fO2)-1)*df) + ' ' + du : '—',
-    mod13: fO2 > 0 ? fmt(((1.3/fO2)-1)*df) + ' ' + du : '—',
-    mod14: fO2 > 0 ? fmt(((1.4/fO2)-1)*df) + ' ' + du : '—',
-    mod16: fO2 > 0 ? fmt(((1.6/fO2)-1)*df) + ' ' + du : '—',
+    mod12: fO2 > 0 ? fmt(((1.2/fO2)-1)*df) + ' ' + du : '\u2014',
+    mod13: fO2 > 0 ? fmt(((1.3/fO2)-1)*df) + ' ' + du : '\u2014',
+    mod14: fO2 > 0 ? fmt(((1.4/fO2)-1)*df) + ' ' + du : '\u2014',
+    mod16: fO2 > 0 ? fmt(((1.6/fO2)-1)*df) + ' ' + du : '\u2014',
   };
+}
+
+// === REVERSE GAS SOLVER ===
+function calcReverseGas() {
+  const curP = readPsi('t-cur-psi'), tgtP = readPsi('r-tgt-psi');
+  const curO2 = val('t-cur-o2'), curHe = val('t-cur-he');
+  const tgtO2 = val('r-tgt-o2'), tgtHe = val('r-tgt-he');
+  const el = $('r-result');
+
+  if (tgtP <= curP || tgtP <= 0) { el.innerHTML = '<div class="reverse-error">Target pressure must exceed current</div>'; return; }
+  if (tgtO2+tgtHe > 100.01) { el.innerHTML = '<div class="reverse-error">Target fractions exceed 100%</div>'; return; }
+
+  const added = tgtP - curP;
+  let fillO2, fillHe;
+
+  if (isRealGas()) {
+    const T = getGlobalTempK();
+    const curN2 = 100-curO2-curHe;
+    const Z_cur = curP > 0 ? Zmix(curP, T, curO2/100, curHe/100, curN2/100) : 1;
+    const A_cur = curP / Z_cur;
+    // Iterate to find fill gas composition
+    let rO2 = tgtO2, rHe = tgtHe, rN2 = 100-rO2-rHe;
+    for (let i = 0; i < 20; i++) {
+      const Z_f = Zmix(tgtP, T, rO2/100, rHe/100, rN2/100);
+      const A_f = tgtP / Z_f;
+      const A_add = A_f - A_cur;
+      if (A_add <= 0) break;
+      fillO2 = ((rO2/100*A_f) - (curO2/100*A_cur)) / A_add * 100;
+      fillHe = ((rHe/100*A_f) - (curHe/100*A_cur)) / A_add * 100;
+      const newO2t = (curO2/100*A_cur + fillO2/100*A_add)/A_f*100;
+      const newHet = (curHe/100*A_cur + fillHe/100*A_add)/A_f*100;
+      if (Math.abs(newO2t-rO2)<0.001) break;
+      rO2 = newO2t; rHe = newHet; rN2 = 100-rO2-rHe;
+    }
+  } else {
+    fillO2 = (tgtO2/100*tgtP - curO2/100*curP) / added * 100;
+    fillHe = (tgtHe/100*tgtP - curHe/100*curP) / added * 100;
+  }
+
+  const fillN2 = 100 - fillO2 - fillHe;
+
+  if (fillO2 < -0.5 || fillHe < -0.5 || fillO2 > 100.5 || fillHe > 100.5 || fillN2 < -0.5) {
+    el.innerHTML = '<div class="reverse-error">Not achievable with a single fill gas</div>';
+    return;
+  }
+
+  const rO2 = Math.max(0,fillO2), rHe = Math.max(0,fillHe);
+  const name = topoffName(rO2, rHe);
+  el.innerHTML =
+    '<div class="reverse-result">' +
+    '<div class="reverse-mix">' + name + '</div>' +
+    '<div class="reverse-detail">O\u2082 ' + rO2.toFixed(1) + '% \u00b7 He ' + rHe.toFixed(1) + '% \u00b7 N\u2082 ' + Math.max(0,fillN2).toFixed(1) + '%</div>' +
+    '</div>';
 }
 
 // === BLENDER ===
 function calcBlender() {
-  const pu = units1, du = dunit(units1);
+  const pu = globalUnit, du = dunit();
   document.querySelectorAll('.b-pu').forEach(el => el.textContent = pu);
   document.querySelectorAll('.b-du').forEach(el => el.textContent = du);
 
-  // Read all values in PSI/ft (canonical)
   const curP = readPsi('b-cur-psi'), tgtP = readPsi('b-tgt-psi');
   const curO2 = val('b-cur-o2'), curHe = val('b-cur-he'), curN2 = 100-curO2-curHe;
   const tgtO2 = val('b-tgt-o2'), tgtHe = val('b-tgt-he'), tgtN2 = 100-tgtO2-tgtHe;
   const topO2 = val('b-top-o2'), topHe = val('b-top-he'), topN2 = 100-topO2-topHe;
   const depthFt = readFt('b-depth');
+  const banked = globalO2Src === 'banked';
+  const o2SrcO2 = banked ? val('b-banked-o2') : 100;
+  const o2SrcName = banked ? 'EAN' + Math.round(o2SrcO2) : 'Oxygen';
 
   $('b-cur-n2').textContent = curN2.toFixed(1);
   $('b-tgt-n2').textContent = tgtN2.toFixed(1);
@@ -901,15 +1050,15 @@ function calcBlender() {
   if (topO2+topHe > 100.01) errors.push('Top-off gas fractions exceed 100%');
   if (tgtP <= 0) errors.push('Target pressure must be > 0');
   if (curP < 0) errors.push('Current pressure cannot be negative');
-  if (topN2 <= 0 && tgtN2 > 0.5) errors.push('Top-off gas has no N₂ — cannot achieve target N₂');
+  if (topN2 <= 0 && tgtN2 > 0.5) errors.push('Top-off gas has no N\u2082');
 
   const errEl = $('b-error'), bestEl = $('b-best');
   const sp = v => showPressure(v, pu);
 
   const clearResults = () => {
-    ['b-add-he','b-add-o2','b-add-top'].forEach(id => $(id).textContent = '—');
+    ['b-add-he','b-add-o2','b-add-top'].forEach(id => $(id).textContent = '\u2014');
     $('b-stops-body').innerHTML = '';
-    ['b-ppo2','b-end','b-mod12','b-mod13','b-mod14','b-mod16'].forEach(id => $(id).textContent = '—');
+    ['b-ppo2','b-end','b-mod12','b-mod13','b-mod14','b-mod16'].forEach(id => $(id).textContent = '\u2014');
   };
   const hideImpossible = () => {
     errEl.classList.remove('visible'); bestEl.classList.remove('visible');
@@ -918,35 +1067,38 @@ function calcBlender() {
   };
 
   if (errors.length) {
-    errEl.textContent = errors.join(' · '); errEl.classList.add('visible');
+    errEl.textContent = errors.join(' \u00b7 '); errEl.classList.add('visible');
     bestEl.classList.remove('visible');
     ['b-add-section','b-stops-section'].forEach(id => $(id).classList.add('dimmed'));
     $('b-drain-section').classList.remove('warn-state','error-state');
-    $('b-drain').textContent = '—'; $('b-drain').className = 'drain-value ok';
+    $('b-drain').textContent = '\u2014'; $('b-drain').className = 'drain-value ok';
     clearResults(); return;
   }
 
-  // All math in PSI
-  let { heAdd, o2Add, topPsi } = calcBlend(topO2, topHe, topN2, curP, curO2, curHe, curN2, tgtP, tgtO2, tgtHe, tgtN2);
+  // Ideal gas pass (for drain detection — drain logic stays ideal)
+  let blendFn = banked
+    ? (s,c1,c2,c3,t,t1,t2,t3) => calcBlendBanked(topO2,topHe,topN2,s,c1,c2,c3,t,t1,t2,t3,o2SrcO2)
+    : (s,c1,c2,c3,t,t1,t2,t3) => calcBlend(topO2,topHe,topN2,s,c1,c2,c3,t,t1,t2,t3);
+
+  let { heAdd, o2Add, topPsi } = blendFn(curP, curO2, curHe, curN2, tgtP, tgtO2, tgtHe, tgtN2);
   let startP = curP;
   const drainNeeded = heAdd < -0.5 || o2Add < -0.5 || topPsi < -0.5;
   const tName = topoffName(topO2, topHe);
 
   const showImpossible = () => {
     const best = bestMix(topO2, topHe, topN2, curP, curO2, curHe, curN2, tgtP, tgtHe);
-    const bestO2 = Math.round(best.o2), bestHe = Math.round(best.he), bestN2r = 100 - best.o2 - best.he;
+    const bestO2 = Math.round(best.o2), bestHe = Math.round(best.he), bestN2r = 100-best.o2-best.he;
     errEl.textContent = 'This blend is not achievable with ' + tName + ' top-off.';
     errEl.classList.add('visible');
     $('b-best-mix').textContent = bestO2 + '/' + bestHe;
-    $('b-best-detail').innerHTML = 'O₂ ' + best.o2.toFixed(1) + '% · He ' + best.he.toFixed(1) + '% · N₂ ' + bestN2r.toFixed(1) + '%';
-    const bestBlend = calcBlend(topO2, topHe, topN2, curP, curO2, curHe, curN2, tgtP, best.o2, best.he, bestN2r);
-    const bStops = [];
-    let bGauge = Math.round(curP);
+    $('b-best-detail').innerHTML = 'O\u2082 ' + best.o2.toFixed(1) + '% \u00b7 He ' + best.he.toFixed(1) + '% \u00b7 N\u2082 ' + bestN2r.toFixed(1) + '%';
+    const bestBlend = calcBlend(topO2,topHe,topN2,curP,curO2,curHe,curN2,tgtP,best.o2,best.he,bestN2r);
+    const bStops = []; let bGauge = Math.round(curP);
     const [bHeR, bO2R, bTopR] = roundConsistent([Math.max(0,bestBlend.heAdd), Math.max(0,bestBlend.o2Add), Math.max(0,bestBlend.topPsi)]);
-    if (bHeR >= 1) { bGauge += bHeR; bStops.push('He → ' + sp(bGauge)); }
-    if (bO2R >= 1) { bGauge += bO2R; bStops.push('O₂ → ' + sp(bGauge)); }
-    if (bTopR >= 1) { bStops.push(tName + ' → ' + sp(tgtP)); }
-    $('b-best-recipe').innerHTML = bStops.length ? '<span style="color:var(--text-muted); font-size:1.1rem;">Fill plan: </span>' + bStops.join(' · ') : '';
+    if (bHeR >= 1) { bGauge += bHeR; bStops.push('He \u2192 ' + sp(bGauge)); }
+    if (bO2R >= 1) { bGauge += bO2R; bStops.push('O\u2082 \u2192 ' + sp(bGauge)); }
+    if (bTopR >= 1) { bStops.push(tName + ' \u2192 ' + sp(tgtP)); }
+    $('b-best-recipe').innerHTML = bStops.length ? '<span style="color:var(--text-muted); font-size:1.1rem;">Fill plan: </span>' + bStops.join(' \u00b7 ') : '';
     bestEl.classList.add('visible');
     ['b-add-section','b-stops-section'].forEach(id => $(id).classList.add('dimmed'));
     $('b-drain').textContent = 'Not possible'; $('b-drain').className = 'drain-value warn';
@@ -957,58 +1109,56 @@ function calcBlender() {
   if (drainNeeded) {
     const drainTo = calcDrainTo(topO2, topHe, topN2, curO2, curHe, curN2, tgtP, tgtO2, tgtHe, tgtN2);
     if (drainTo < 0 || drainTo >= curP) { showImpossible(); return; }
-    const check = calcBlend(topO2, topHe, topN2, drainTo, curO2, curHe, curN2, tgtP, tgtO2, tgtHe, tgtN2);
+    const check = blendFn(drainTo, curO2, curHe, curN2, tgtP, tgtO2, tgtHe, tgtN2);
     if (check.heAdd < -0.5 || check.o2Add < -0.5 || check.topPsi < -0.5) { showImpossible(); return; }
     hideImpossible();
-    $('b-drain').textContent = sp(drainTo) + ' ' + pu;
-    $('b-drain').className = 'drain-value warn';
+    $('b-drain').textContent = sp(drainTo) + ' ' + pu; $('b-drain').className = 'drain-value warn';
     $('b-drain-section').classList.add('warn-state'); $('b-drain-section').classList.remove('error-state');
     startP = drainTo;
-    ({ heAdd, o2Add, topPsi } = calcBlend(topO2, topHe, topN2, startP, curO2, curHe, curN2, tgtP, tgtO2, tgtHe, tgtN2));
+    ({ heAdd, o2Add, topPsi } = blendFn(startP, curO2, curHe, curN2, tgtP, tgtO2, tgtHe, tgtN2));
   } else {
     hideImpossible();
     $('b-drain').textContent = 'No drain needed'; $('b-drain').className = 'drain-value ok';
   }
 
-  // Gas amounts and gauge stops — Z-corrected if enabled
-  const useZ = $('b-z-enable').checked;
-  const T_K = useZ ? getTempK('b-temp', pu) : T_REF;
-  let heDisp, o2Disp, topDisp, stop1, stop2, stop3, hasO2step;
-
+  // Display results — Z-corrected if real gas
   $('b-top-label').textContent = 'Top-off ' + tName;
+  let heDisp, o2Disp, topDisp, stop1, stop2, stop3, hasO2step;
+  const useZ = isRealGas();
+  const T_K = useZ ? getGlobalTempK() : T_REF;
+
+  // Update O2 step label
+  const o2Label = $('b-add-o2')?.parentElement?.parentElement?.querySelector('.result-label');
+  if (o2Label) o2Label.textContent = o2SrcName;
 
   if (useZ) {
-    const zr = calcBlendZ(startP, curO2, curHe, tgtP, tgtO2, tgtHe, topO2, topHe, T_K);
+    const zr = calcBlendZ(startP, curO2, curHe, tgtP, tgtO2, tgtHe, topO2, topHe, o2SrcO2, T_K);
     if (zr.feasible) {
       const [hR, oR, tR] = roundConsistent([zr.heGauge, Math.max(0, zr.o2Gauge), zr.topGauge]);
       heDisp = hR; o2Disp = oR; topDisp = tR;
       stop1 = Math.round(zr.stop1); stop2 = Math.round(zr.stop2); stop3 = Math.round(zr.stop3);
       hasO2step = zr.o2Gauge > 0.5;
-      $('b-z-info').textContent = 'Z_mix = ' + zr.Z_target.toFixed(4);
-      $('b-z-info').style.display = '';
+      $('global-z-info').textContent = 'Z_mix = ' + zr.Z_target.toFixed(4);
+      $('global-z-info').style.display = '';
     } else {
-      // Shouldn't hit this if drain logic already handled it, but fallback
       heDisp = 0; o2Disp = 0; topDisp = 0; stop1 = 0; stop2 = 0; stop3 = 0; hasO2step = false;
     }
   } else {
     const [heR, o2R, topR] = roundConsistent([heAdd, o2Add, topPsi]);
     heDisp = heR; o2Disp = o2R; topDisp = topR;
-    stop1 = Math.round(startP) + heR;
-    stop2 = stop1 + o2R;
-    stop3 = Math.round(tgtP);
+    stop1 = Math.round(startP) + heR; stop2 = stop1 + o2R; stop3 = Math.round(tgtP);
     hasO2step = o2Add > 0.5;
-    $('b-z-info').style.display = 'none';
+    $('global-z-info').style.display = 'none';
   }
 
   $('b-add-he').textContent = sp(heDisp);
   $('b-add-o2').textContent = sp(o2Disp);
   $('b-add-top').textContent = sp(topDisp);
 
-  // Gauge stops
   const stops = [];
-  if (heDisp >= 1) stops.push({ gas:'he', label:'Helium', value: useZ ? stop1 : stop1 });
-  if (hasO2step && o2Disp >= 1) stops.push({ gas:'o2', label:'Oxygen', value: useZ ? stop2 : stop2 });
-  if (topDisp >= 1) stops.push({ gas:'top', label:'Top-off ' + tName, value: stop3 });
+  if (heDisp >= 1) stops.push({ gas:'he', label:'Helium', value:stop1 });
+  if (hasO2step && o2Disp >= 1) stops.push({ gas:'o2', label:o2SrcName, value:stop2 });
+  if (topDisp >= 1) stops.push({ gas:'top', label:'Top-off ' + tName, value:stop3 });
 
   const stopsBody = $('b-stops-body');
   stopsBody.innerHTML = '';
@@ -1022,21 +1172,18 @@ function calcBlender() {
     });
   }
 
-  // Dive data — always from ft internally
   const dd = diveData(tgtO2/100, tgtHe/100, depthFt, pu);
-  $('b-ppo2').textContent = dd.ppo2;
-  $('b-end').textContent = dd.end;
-  $('b-mod12').textContent = dd.mod12;
-  $('b-mod13').textContent = dd.mod13;
-  $('b-mod14').textContent = dd.mod14;
-  $('b-mod16').textContent = dd.mod16;
+  $('b-ppo2').textContent = dd.ppo2; $('b-end').textContent = dd.end;
+  $('b-mod12').textContent = dd.mod12; $('b-mod13').textContent = dd.mod13;
+  $('b-mod14').textContent = dd.mod14; $('b-mod16').textContent = dd.mod16;
 }
 
 // === TOP-OFF ===
 function calcTopoff() {
-  const pu = units2, du = dunit(units2);
+  const pu = globalUnit, du = dunit();
   document.querySelectorAll('.t-pu').forEach(el => el.textContent = pu);
   document.querySelectorAll('.t-du').forEach(el => el.textContent = du);
+  document.querySelectorAll('.g-pu').forEach(el => el.textContent = pu);
 
   const curP = readPsi('t-cur-psi'), tgtP = readPsi('t-tgt-psi');
   const curO2 = val('t-cur-o2'), curHe = val('t-cur-he'), curN2 = 100-curO2-curHe;
@@ -1052,26 +1199,21 @@ function calcTopoff() {
   if (curP > tgtP) errors.push('Current pressure exceeds final pressure');
 
   const errEl = $('t-error');
-  if (errors.length) { errEl.textContent = errors.join(' · '); errEl.classList.add('visible'); $('t-mix-section').classList.add('dimmed'); return; }
+  if (errors.length) { errEl.textContent = errors.join(' \u00b7 '); errEl.classList.add('visible'); $('t-mix-section').classList.add('dimmed'); return; }
   errEl.classList.remove('visible'); $('t-mix-section').classList.remove('dimmed');
 
   const added = tgtP - curP;
   let resO2, resHe, resN2;
-
-  const useZ = $('t-z-enable').checked;
-  const T_K = useZ ? getTempK('t-temp', pu) : T_REF;
+  const useZ = isRealGas();
+  const T_K = useZ ? getGlobalTempK() : T_REF;
 
   if (useZ && tgtP > 0) {
     const zr = calcTopoffZ(curP, curO2, curHe, fillO2, fillHe, tgtP, T_K);
     resO2 = zr.resO2; resHe = zr.resHe; resN2 = zr.resN2;
-    const Z_f = Zmix(tgtP, T_K, resO2/100, resHe/100, resN2/100);
-    $('t-z-info').textContent = 'Z_mix = ' + Z_f.toFixed(4);
-    $('t-z-info').style.display = '';
   } else {
     resO2 = tgtP > 0 ? (curO2/100*curP + fillO2/100*added)/tgtP*100 : 0;
     resHe = tgtP > 0 ? (curHe/100*curP + fillHe/100*added)/tgtP*100 : 0;
-    resN2 = 100 - resO2 - resHe;
-    $('t-z-info').style.display = 'none';
+    resN2 = 100-resO2-resHe;
   }
 
   $('t-res-o2').textContent = resO2.toFixed(1); $('t-res-he').textContent = resHe.toFixed(1); $('t-res-n2').textContent = resN2.toFixed(1);
@@ -1081,167 +1223,125 @@ function calcTopoff() {
   $('t-ppo2').textContent = dd.ppo2; $('t-end').textContent = dd.end;
   $('t-mod12').textContent = dd.mod12; $('t-mod13').textContent = dd.mod13;
   $('t-mod14').textContent = dd.mod14; $('t-mod16').textContent = dd.mod16;
-}
 
-// === UNIT TOGGLES ===
-setupToggle('units1', u => {
-  if (u === units1) return;
-  convertFields(['b-cur-psi','b-tgt-psi'], ['pressure','pressure'], u);
-  convertFields(['b-depth'], ['depth'], u);
-  updateTempUnit('b', u);
-  units1 = u;
-  calcBlender();
-});
-
-setupToggle('units2', u => {
-  if (u === units2) return;
-  convertFields(['t-cur-psi','t-tgt-psi'], ['pressure','pressure'], u);
-  convertFields(['t-depth'], ['depth'], u);
-  updateTempUnit('t', u);
-  units2 = u;
-  calcTopoff();
-});
-
-// === INPUT WIRING ===
-// Blender pressure inputs
-['b-cur-psi','b-tgt-psi'].forEach(id => {
-  $(id).addEventListener('input', () => { onPressureInput(id, units1); calcBlender(); });
-});
-$('b-depth').addEventListener('input', () => { onDepthInput('b-depth', units1); calcBlender(); });
-// Blender gas % inputs
-['b-cur-o2','b-cur-he','b-tgt-o2','b-tgt-he','b-top-o2','b-top-he'].forEach(id => {
-  $(id).addEventListener('input', calcBlender);
-});
-
-// Topoff pressure inputs
-['t-cur-psi','t-tgt-psi'].forEach(id => {
-  $(id).addEventListener('input', () => { onPressureInput(id, units2); calcTopoff(); });
-});
-$('t-depth').addEventListener('input', () => { onDepthInput('t-depth', units2); calcTopoff(); });
-// Topoff gas % inputs
-['t-cur-o2','t-cur-he','t-fill-o2','t-fill-he'].forEach(id => {
-  $(id).addEventListener('input', calcTopoff);
-});
-
-// Z-factor toggles and temp inputs
-$('b-z-enable').addEventListener('change', () => {
-  const show = $('b-z-enable').checked;
-  $('b-temp-wrap').style.display = show ? '' : 'none';
-  $('b-z-info').style.display = show ? '' : 'none';
-  calcBlender();
-});
-$('b-temp').addEventListener('input', calcBlender);
-
-$('t-z-enable').addEventListener('change', () => {
-  const show = $('t-z-enable').checked;
-  $('t-temp-wrap').style.display = show ? '' : 'none';
-  $('t-z-info').style.display = show ? '' : 'none';
-  calcTopoff();
-});
-$('t-temp').addEventListener('input', calcTopoff);
-
-// Update temp units when pressure units change
-function updateTempUnit(prefix, pu) {
-  const tempEl = $(prefix + '-temp');
-  const unitEl = $(prefix + '-temp-unit');
-  const oldUnit = unitEl.textContent;
-  const newTempUnit = pu === 'psi' ? '°F' : '°C';
-  if (oldUnit !== newTempUnit) {
-    const v = parseFloat(tempEl.value) || 70;
-    if (newTempUnit === '°C') {
-      tempEl.value = Math.round((v - 32) * 5/9);
-    } else {
-      tempEl.value = Math.round(v * 9/5 + 32);
-    }
-    unitEl.textContent = newTempUnit;
-  }
+  calcReverseGas();
 }
 
 // === MOD / BEST MIX ===
 function calcModMix() {
-  const pu = units3, df = dfact(units3), du = dunit(units3);
+  const pu = globalUnit, du = dunit();
   document.querySelectorAll('.m-du').forEach(el => el.textContent = du);
-
   const o2 = val('m-o2'), he = val('m-he');
-  const depthFt = readFt('m-depth');
-  const endTargetFt = readFt('m-end-target');
-
-  $('m-n2').textContent = (100 - o2 - he).toFixed(1);
-
+  const depthFt = readFt('m-depth'), endTargetFt = readFt('m-end-target');
+  $('m-n2').textContent = (100-o2-he).toFixed(1);
   const fO2 = o2/100, fHe = he/100;
 
-  // MOD at various ppO2
-  [1.2, 1.3, 1.4, 1.6].forEach(pp => {
+  [1.2,1.3,1.4,1.6].forEach(pp => {
     const modFt = fO2 > 0 ? ((pp/fO2)-1)*33 : 0;
-    const modDisplay = showDepth(modFt, pu);
     const endFt = ((1-fHe)*(modFt+33)/33-1)*33;
-    const endDisplay = showDepth(endFt, pu);
     const suffix = pp.toFixed(1).replace('.','');
-    $('m-mod' + suffix).textContent = fO2 > 0 ? modDisplay + ' ' + du : '—';
-    $('m-end' + suffix).textContent = fO2 > 0 ? endDisplay + ' ' + du : '—';
+    $('m-mod'+suffix).textContent = fO2 > 0 ? showDepth(modFt,pu)+' '+du : '\u2014';
+    $('m-end'+suffix).textContent = fO2 > 0 ? showDepth(endFt,pu)+' '+du : '\u2014';
   });
 
-  // Best O2% for depth at various ppO2
-  const depth = depthFt; // internal ft
-  const ata = depth/33 + 1;
-  [1.2, 1.3, 1.4, 1.6].forEach(pp => {
-    const bestO2 = pp / ata * 100;
-    const suffix = pp.toFixed(1).replace('.','');
-    $('m-bo2-' + suffix).textContent = ata > 0 ? bestO2.toFixed(1) + '%' : '—';
+  const ata = depthFt/33+1;
+  [1.2,1.3,1.4,1.6].forEach(pp => {
+    const bestO2 = pp/ata*100;
+    $('m-bo2-'+pp.toFixed(1).replace('.','')).textContent = ata > 0 ? bestO2.toFixed(1)+'%' : '\u2014';
   });
 
-  // He% for target END
-  // END_ft = ((1-fHe)*(depth_ft+33)/33 - 1)*33
-  // Solve: fHe = 1 - (endTargetFt+33)/(depthFt+33)
-  const heNeeded = depthFt > 0 ? (1 - (endTargetFt+33)/(depthFt+33)) * 100 : 0;
-  const heClamp = Math.max(0, Math.min(100, heNeeded));
-  $('m-he-needed').textContent = depthFt > 0 ? heClamp.toFixed(1) + '%' : '—';
+  const heNeeded = depthFt > 0 ? (1-(endTargetFt+33)/(depthFt+33))*100 : 0;
+  const heClamp = Math.max(0,Math.min(100,heNeeded));
+  $('m-he-needed').textContent = depthFt > 0 ? heClamp.toFixed(1)+'%' : '\u2014';
 
-  // Recommended mixes: combine best O2 at each ppO2 with the He needed
   const mixBody = $('m-mixes-body');
   mixBody.innerHTML = '';
   if (depthFt <= 0) return;
-
-  [1.2, 1.3, 1.4, 1.6].forEach(pp => {
-    const bestO2 = Math.min(pp / ata * 100, 100);
-    const roundO2 = Math.round(bestO2);
-    const roundHe = Math.round(heClamp);
-    // Skip if O2+He > 100
-    if (roundO2 + roundHe > 100) return;
-
-    const div = document.createElement('div');
-    div.className = 'result-row';
-    const mixLabel = roundHe > 0 ? roundO2 + '/' + roundHe : (roundO2 === 21 ? 'Air' : 'EAN' + roundO2);
-    div.innerHTML =
-      '<span class="result-label" style="color:var(--text-dim)">ppO₂ ' + pp.toFixed(1) + '</span>' +
-      '<span class="result-value" style="color:var(--text);background:var(--surface-raised);padding:0.25rem 0.7rem;border-radius:5px;font-size:1.1rem;">' + mixLabel + '</span>';
+  [1.2,1.3,1.4,1.6].forEach(pp => {
+    const bestO2 = Math.min(pp/ata*100,100);
+    const roundO2 = Math.round(bestO2), roundHe = Math.round(heClamp);
+    if (roundO2+roundHe > 100) return;
+    const div = document.createElement('div'); div.className = 'result-row';
+    const mixLabel = roundHe > 0 ? roundO2+'/'+roundHe : (roundO2===21?'Air':'EAN'+roundO2);
+    div.innerHTML = '<span class="result-label" style="color:var(--text-dim)">ppO\u2082 '+pp.toFixed(1)+'</span><span class="result-value" style="color:var(--text);background:var(--surface-raised);padding:0.25rem 0.7rem;border-radius:5px;font-size:1.1rem;">'+mixLabel+'</span>';
     mixBody.appendChild(div);
   });
 }
 
-setupToggle('units3', u => {
-  if (u === units3) return;
-  convertFields(['m-depth','m-end-target'], ['depth','depth'], u);
-  units3 = u;
-  calcModMix();
+function recalcAll() { calcBlender(); calcTopoff(); calcModMix(); }
+
+// === SHARED TOGGLE HANDLERS ===
+setupToggle('global-units', u => {
+  if (u === globalUnit) return;
+  // Convert ALL pressure/depth fields across all tabs
+  convertFields(['b-cur-psi','b-tgt-psi'], ['pressure','pressure'], u);
+  convertFields(['t-cur-psi','t-tgt-psi','r-tgt-psi'], ['pressure','pressure','pressure'], u);
+  convertFields(['b-depth','t-depth','m-depth','m-end-target'], ['depth','depth','depth','depth'], u);
+  // Convert temp
+  const tempEl = $('global-temp'), unitEl = $('global-temp-unit');
+  const oldTU = unitEl.textContent, newTU = u === 'psi' ? '\u00b0F' : '\u00b0C';
+  if (oldTU !== newTU) {
+    const v = parseFloat(tempEl.value) || 70;
+    tempEl.value = newTU === '\u00b0C' ? Math.round((v-32)*5/9) : Math.round(v*9/5+32);
+    unitEl.textContent = newTU;
+  }
+  globalUnit = u;
+  recalcAll();
 });
 
-// MOD/Best Mix inputs
-['m-o2','m-he'].forEach(id => {
-  $(id).addEventListener('input', calcModMix);
+setupToggle('global-gas', g => {
+  if (g === globalGasModel) return;
+  globalGasModel = g;
+  const show = g === 'real';
+  $('global-temp-wrap').style.display = show ? '' : 'none';
+  $('global-z-info').style.display = show ? '' : 'none';
+  recalcAll();
 });
-$('m-depth').addEventListener('input', () => { onDepthInput('m-depth', units3); calcModMix(); });
-$('m-end-target').addEventListener('input', () => { onDepthInput('m-end-target', units3); calcModMix(); });
+
+// === INPUT WIRING ===
+['b-cur-psi','b-tgt-psi'].forEach(id => {
+  $(id).addEventListener('input', () => { onPressureInput(id); calcBlender(); });
+});
+$('b-depth').addEventListener('input', () => { onDepthInput('b-depth'); calcBlender(); });
+['b-cur-o2','b-cur-he','b-tgt-o2','b-tgt-he','b-top-o2','b-top-he'].forEach(id => {
+  $(id).addEventListener('input', calcBlender);
+});
+
+setupToggle('global-o2src', o => {
+  if (o === globalO2Src) return;
+  globalO2Src = o;
+  $('banked-pct-wrap').style.display = o === 'banked' ? '' : 'none';
+  calcBlender();
+});
+$('b-banked-o2').addEventListener('input', calcBlender);
+
+['t-cur-psi','t-tgt-psi'].forEach(id => {
+  $(id).addEventListener('input', () => { onPressureInput(id); calcTopoff(); });
+});
+$('t-depth').addEventListener('input', () => { onDepthInput('t-depth'); calcTopoff(); });
+['t-cur-o2','t-cur-he','t-fill-o2','t-fill-he'].forEach(id => {
+  $(id).addEventListener('input', calcTopoff);
+});
+
+['r-tgt-psi'].forEach(id => {
+  $(id).addEventListener('input', () => { onPressureInput(id); calcTopoff(); });
+});
+['r-tgt-o2','r-tgt-he'].forEach(id => {
+  $(id).addEventListener('input', calcTopoff);
+});
+
+$('global-temp').addEventListener('input', recalcAll);
+
+['m-o2','m-he'].forEach(id => { $(id).addEventListener('input', calcModMix); });
+$('m-depth').addEventListener('input', () => { onDepthInput('m-depth'); calcModMix(); });
+$('m-end-target').addEventListener('input', () => { onDepthInput('m-end-target'); calcModMix(); });
 
 // === INIT ===
-// Initialize canonical values from HTML defaults (all in PSI/ft)
 ['b-cur-psi','b-tgt-psi'].forEach(id => initCanonical(id, 'pressure'));
-['t-cur-psi','t-tgt-psi'].forEach(id => initCanonical(id, 'pressure'));
+['t-cur-psi','t-tgt-psi','r-tgt-psi'].forEach(id => initCanonical(id, 'pressure'));
 ['b-depth','t-depth','m-depth','m-end-target'].forEach(id => initCanonical(id, 'depth'));
 
-calcBlender();
-calcTopoff();
-calcModMix();
+recalcAll();
 </script>
 </body>
 </html>
