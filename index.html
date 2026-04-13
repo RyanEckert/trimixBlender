@@ -324,12 +324,92 @@
     font-family: var(--mono); font-size: 0.9rem; font-weight: 600;
     color: var(--err-color); text-align: center; padding: 0.75rem 0;
   }
+
+  .gas-cards { display: flex; flex-direction: column; gap: 1rem; }
+  .gas-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+    position: relative;
+  }
+  .gas-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.5rem 1rem; background: var(--surface-raised); border-bottom: 1px solid var(--border);
+  }
+  .gas-card-title {
+    font-size: 0.9rem; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.1em;
+  }
+  .gas-card-remove {
+    background: none; border: none; color: var(--err-color); cursor: pointer;
+    font-size: 1.2rem; font-weight: 700; opacity: 0.5; transition: opacity 0.2s;
+    padding: 0 0.3rem;
+  }
+  .gas-card-remove:hover { opacity: 1; }
+  .gas-card-body {
+    padding: 0.75rem 1rem;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem 1.25rem;
+  }
+  .gas-card-body .input-row { padding: 0.35rem 0; }
+  .gas-card-tags { display: flex; gap: 0.5rem; align-items: center; padding: 0.4rem 1rem 0.6rem; }
+  .gas-tag {
+    font-size: 0.75rem; font-weight: 600; padding: 0.2rem 0.5rem;
+    border-radius: 4px; cursor: pointer; border: 1px solid var(--border);
+    background: none; color: var(--text-dim); transition: all 0.2s;
+  }
+  .gas-tag.active { background: var(--surface-raised); color: var(--text); border-color: var(--text-dim); }
+  .gas-tag.ccr { border-color: var(--pink); color: var(--pink); }
+  .gas-tag.ccr.active { background: rgba(255,121,198,0.15); }
+  .add-gas-btn {
+    display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+    width: 100%; padding: 0.7rem; margin-top: 0.5rem;
+    background: var(--surface); border: 2px dashed var(--border); border-radius: 10px;
+    color: var(--text-dim); font-family: var(--mono); font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .add-gas-btn:hover { border-color: var(--text-dim); color: var(--text); }
+  .supply-row {
+    display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0;
+    flex-wrap: wrap;
+  }
+  .supply-row + .supply-row { border-top: 1px solid var(--border); }
+  .supply-select {
+    font-family: var(--mono); font-size: 0.85rem; font-weight: 500;
+    color: var(--text); background: var(--surface-raised); border: 1px solid var(--border);
+    border-radius: 4px; padding: 0.3rem 0.4rem; cursor: pointer; outline: none;
+  }
+  .supply-detail { font-size: 0.8rem; color: var(--text-dim); }
+  .supply-input {
+    width: 60px; padding: 0.25rem 0.35rem;
+    font-family: var(--mono); font-size: 0.85rem; font-weight: 500;
+    color: var(--text); background: var(--surface);
+    border: 1px solid var(--border); border-radius: 4px;
+    text-align: right; outline: none;
+  }
+  .supply-input:focus { border-color: var(--text-dim); }
+  .gas-totals { margin-top: 1.5rem; }
+  .total-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.6rem 0;
+  }
+  .total-row + .total-row { border-top: 1px solid var(--border); }
+  .total-label { font-size: 0.95rem; font-weight: 500; }
+  .total-value { font-size: 1.1rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 5px; }
+  .bottles-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.5rem 0; font-size: 0.9rem;
+  }
+  .bottles-row + .bottles-row { border-top: 1px solid var(--border); }
+  .bottles-count {
+    font-weight: 700; font-size: 1.1rem;
+    padding: 0.2rem 0.6rem; border-radius: 5px;
+  }
+  .cost-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.5rem 0; font-size: 0.9rem;
+  }
+  .cost-row + .cost-row { border-top: 1px solid var(--border); }
+  .cost-value { font-weight: 700; color: var(--warn-color); }
+  .cost-total { font-size: 1.1rem; }
 </style>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#282a36">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon-192.png">
 </head>
 <body>
 <div class="container">
@@ -375,6 +455,7 @@
     <button class="tab active" data-tab="blender">Blending Calculator</button>
     <button class="tab" data-tab="topoff">Top-Off Calculator</button>
     <button class="tab" data-tab="modmix">MOD / Best Mix</button>
+    <button class="tab" data-tab="gasplan">Gas Planning</button>
   </div>
 
   <!-- ==================== BLENDER ==================== -->
@@ -454,7 +535,7 @@
     <div class="best-i-can-do" id="b-best">
       <div class="error-banner" id="b-error" style="margin:0; border-radius:0; border:none; border-bottom:1px solid var(--err-border);"></div>
       <div class="best-i-can-do-header">
-        <img id="best-img" class="best-img" src="img.jpg" alt="">
+        <img id="best-img" class="best-img" src="https://i.kym-cdn.com/photos/images/original/002/137/897/75a.jpg" alt="">
         <div class="meme-text">Best I can do is...</div>
       </div>
       <div class="best-i-can-do-body">
@@ -612,6 +693,71 @@
     </div>
   </div>
 
+
+  <!-- ==================== GAS PLANNING ==================== -->
+  <div id="gasplan" class="tab-content">
+    <div class="calc-grid">
+      <div class="col">
+        <div class="gas-cards" id="gp-cards"></div>
+        <button class="add-gas-btn" id="gp-add-gas">+ Add Gas</button>
+      </div>
+      <div class="col">
+        <div class="section">
+          <div class="section-header">Supply Cylinders</div>
+          <div class="section-body">
+            <div class="supply-row">
+              <span class="input-label he" style="min-width:28px;">He</span>
+              <select class="supply-select" id="gp-he-type">
+                <option value="k">K-bottle</option>
+                <option value="t">T-cylinder</option>
+              </select>
+              <span class="supply-detail"><span id="gp-he-spec">249 cf @ 2200</span></span>
+              <span class="supply-detail">Recv:</span>
+              <input type="number" class="supply-input" id="gp-he-recv" value="2200"> <span class="supply-detail">psi</span>
+            </div>
+            <div class="supply-row">
+              <span class="input-label o2" style="min-width:28px;">O₂</span>
+              <select class="supply-select" id="gp-o2-type">
+                <option value="k">K-bottle</option>
+                <option value="t">T-cylinder</option>
+              </select>
+              <span class="supply-detail"><span id="gp-o2-spec">249 cf @ 2200</span></span>
+              <span class="supply-detail">Recv:</span>
+              <input type="number" class="supply-input" id="gp-o2-recv" value="2200"> <span class="supply-detail">psi</span>
+            </div>
+            <div class="supply-row">
+              <span class="input-label" style="min-width:28px;">Floor</span>
+              <input type="number" class="supply-input" id="gp-floor" value="500"> <span class="supply-detail">psi (empty point)</span>
+            </div>
+            <div class="supply-row">
+              <span class="input-label" style="min-width:28px;">Extra</span>
+              <input type="number" class="supply-input" id="gp-extra-pct" value="0" min="0" max="100"> <span class="supply-detail">% contingency</span>
+            </div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-header">Cost (optional)</div>
+          <div class="section-body">
+            <div class="input-row">
+              <span class="input-label he">He per bottle ($)</span>
+              <input type="number" class="he-input" id="gp-he-cost" value="" placeholder="—" min="0">
+            </div>
+            <div class="input-row">
+              <span class="input-label o2">O₂ per bottle ($)</span>
+              <input type="number" class="o2-input" id="gp-o2-cost" value="" placeholder="—" min="0">
+            </div>
+          </div>
+        </div>
+        <div class="section gas-totals" id="gp-results">
+          <div class="section-header">Results</div>
+          <div class="section-body" id="gp-results-body">
+            <div style="text-align:center; padding:1rem; color:var(--text-dim); font-size:0.9rem;">Add a gas to see results</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <footer>
     <div class="disclaimer">
     This tool is a mathematical model and is intended for planning purposes only.<br>
@@ -648,12 +794,7 @@
   </footer>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js">
-// === PWA SERVICE WORKER ===
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js');
-}
-</script><script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const PSI_TO_BAR = 0.0689476;
 const FT_TO_M = 0.3048;
 
@@ -748,12 +889,12 @@ function calcBlendZ(curPsi, curO2, curHe, tgtPsi, tgtO2, tgtHe, topO2, topHe, o2
   // dnO2Src * (o2SrcN2/100) + dnTop * (topN2/100) = nN2t - nN2s
   // dnO2Src * (o2SrcO2/100) + dnTop * (topO2/100) + dnTop * 0 = nO2t - nO2s (O2 from topoff)
   // Wait, topoff He also contributes. Need to account for all He from topoff too.
-
+  
   // Actually let me simplify. The total mole balance:
   // He:  dnHePure + dnTop*(topHe/100) = nHet - nHes
   // O2:  dnO2Src*(o2SrcO2/100) + dnTop*(topO2/100) = nO2t - nO2s
   // N2:  dnO2Src*(o2SrcN2/100) + dnTop*(topN2/100) = nN2t - nN2s
-
+  
   // From He: dnHePure = (nHet - nHes) - dnTop*(topHe/100)
   // From N2: dnO2Src = (dnN2_need - dnTop*(topN2/100)) / (o2SrcN2/100)
   //   where dnN2_need = nN2t - nN2s
@@ -761,13 +902,13 @@ function calcBlendZ(curPsi, curO2, curHe, tgtPsi, tgtO2, tgtHe, topO2, topHe, o2
   // Solve for dnTop:
   // dnO2_need = dnN2_need * o2SrcO2/o2SrcN2 - dnTop * topN2/100 * o2SrcO2/o2SrcN2 + dnTop * topO2/100
   // dnTop * (topO2/100 - topN2/100 * o2SrcO2/o2SrcN2) = dnO2_need - dnN2_need * o2SrcO2/o2SrcN2
-
+  
   const dnO2_need = nO2t - nO2s;
   const dnN2_need = nN2t - nN2s;
   const dnHe_need = nHet - nHes;
-
+  
   let dnTop, dnO2Src;
-
+  
   if (o2SrcN2 > 0 && topN2 > 0) {
     const ratio = o2SrcO2 / o2SrcN2;
     const denom = topO2/100 - topN2/100 * ratio + topHe/100 * 0; // topHe doesn't affect this eq
@@ -797,7 +938,7 @@ function calcBlendZ(curPsi, curO2, curHe, tgtPsi, tgtO2, tgtHe, topO2, topHe, o2
     dnTop = 0;
     dnO2Src = dnN2_need > 0 ? dnN2_need / (o2SrcN2/100) : 0;
   }
-
+  
   const dnHePureFinal = dnHe_need - dnTop * topHe/100;
 
   const feasible = dnHePureFinal >= -0.5 && dnO2Src >= -0.5 && dnTop >= -0.5;
@@ -886,21 +1027,21 @@ function topoffName(o2, he) {
 const titles = {
   blender: 'Mix It Up!',
   topoff: 'Top It Off!',
-  modmix: 'Know Your Limits!'
+  modmix: 'Know Your Limits!',
+  gasplan: 'Bottle Service!'
 };
-
 const subtitles = {
   blender: 'Partial pressure method \u00b7 He \u2192 O\u2082 \u2192 Top-off',
   topoff: 'What mix do I get if I boost with a known gas?',
-  modmix: 'Maximum operating depth \u00b7 Optimal gas selection'
+  modmix: 'Maximum operating depth \u00b7 Optimal gas selection',
+  gasplan: 'Expedition gas planning \u00b7 Supply cylinder logistics'
 };
-
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     tab.classList.add('active'); $(tab.dataset.tab).classList.add('active');
-    document.querySelector('header h1').textContent = titles[tab.dataset.tab] || 'Trimix Blender';
+    document.querySelector('header h1').textContent = titles[tab.dataset.tab] || 'Mix It Up!';
     $('subtitle').textContent = subtitles[tab.dataset.tab] || '';
   });
 });
@@ -928,7 +1069,7 @@ function calcBlendBanked(topO2, topHe, topN2, startP, curO2, curHe, curN2, tgtP,
   const ppO2f = tgtO2/100*tgtP, ppHef = tgtHe/100*tgtP, ppN2f = tgtN2/100*tgtP;
   const ppO2h = curO2/100*startP, ppHeh = curHe/100*startP, ppN2h = curN2/100*startP;
   const dnO2 = ppO2f - ppO2h, dnHe = ppHef - ppHeh, dnN2 = ppN2f - ppN2h;
-
+  
   // Solve: S*(o2SrcO2/100) + T*(topO2/100) = dnO2
   //        S*(o2SrcN2/100) + T*(topN2/100) = dnN2
   //        heAdd = dnHe - T*(topHe/100)
@@ -1286,7 +1427,293 @@ function calcModMix() {
   });
 }
 
-function recalcAll() { calcBlender(); calcTopoff(); calcModMix(); }
+
+// === GAS PLANNING ===
+const CYLINDER_PRESETS = {
+  'AL13': { vol: 13, psi: 3000 },
+  'AL19': { vol: 19, psi: 3000 },
+  'AL30': { vol: 29.5, psi: 3000 },
+  'AL40': { vol: 40, psi: 3000 },
+  'AL63': { vol: 63, psi: 3000 },
+  'AL80': { vol: 77.4, psi: 3000 },
+  'LP85': { vol: 85, psi: 2640 },
+  'HP80': { vol: 80, psi: 3442 },
+  'HP100': { vol: 100, psi: 3442 },
+  'HP120': { vol: 119, psi: 3442 },
+  'Custom': { vol: 80, psi: 3000 },
+};
+
+const SUPPLY_SPECS = {
+  k: { vol: 249, psi: 2200 },
+  t: { vol: 330, psi: 2640 },
+};
+
+let gasCards = [];
+let gasCardId = 0;
+
+function addGasCard(cfg) {
+  const id = gasCardId++;
+  const card = {
+    id,
+    qty: cfg?.qty || 1,
+    preset: cfg?.preset || 'AL80',
+    customVol: cfg?.customVol || 80,
+    customPsi: cfg?.customPsi || 3000,
+    doubles: cfg?.doubles || false,
+    o2: cfg?.o2 || 21,
+    he: cfg?.he || 0,
+    tgtPsi: cfg?.tgtPsi || 3000,
+    topO2: cfg?.topO2 || 21,
+    topHe: cfg?.topHe || 0,
+  };
+  gasCards.push(card);
+  renderGasCards();
+  calcGasPlanning();
+  return id;
+}
+
+function removeGasCard(id) {
+  gasCards = gasCards.filter(c => c.id !== id);
+  renderGasCards();
+  calcGasPlanning();
+}
+
+function renderGasCards() {
+  const container = $('gp-cards');
+  container.innerHTML = '';
+  gasCards.forEach((card, idx) => {
+    const presetOpts = Object.keys(CYLINDER_PRESETS).map(k =>
+      '<option value="' + k + '"' + (card.preset === k ? ' selected' : '') + '>' + k + '</option>'
+    ).join('');
+
+    const customDisplay = card.preset === 'Custom' ? '' : 'display:none;';
+    const p = CYLINDER_PRESETS[card.preset] || CYLINDER_PRESETS['AL80'];
+    const specText = card.preset === 'Custom' ? '' : p.vol + ' cf @ ' + p.psi + ' psi';
+
+    const html = '<div class="gas-card-header">' +
+      '<span class="gas-card-title">Gas ' + (idx+1) + '</span>' +
+      '<button class="gas-card-remove" data-id="' + card.id + '">\u00d7</button></div>' +
+      '<div class="gas-card-body">' +
+      '<div class="input-row"><span class="input-label">Qty</span>' +
+      '<input type="number" class="gp-input" data-id="' + card.id + '" data-field="qty" value="' + card.qty + '" min="1" style="width:50px;"></div>' +
+      '<div class="input-row"><span class="input-label">Cylinder</span>' +
+      '<select class="supply-select gp-input" data-id="' + card.id + '" data-field="preset">' + presetOpts + '</select></div>' +
+      '<div class="input-row" style="' + customDisplay + '" id="gp-custom-vol-' + card.id + '"><span class="input-label">Vol (cf)</span>' +
+      '<input type="number" class="gp-input" data-id="' + card.id + '" data-field="customVol" value="' + card.customVol + '" style="width:65px;"></div>' +
+      '<div class="input-row" style="' + customDisplay + '" id="gp-custom-psi-' + card.id + '"><span class="input-label">Rated psi</span>' +
+      '<input type="number" class="gp-input" data-id="' + card.id + '" data-field="customPsi" value="' + card.customPsi + '" style="width:65px;"></div>' +
+      '<div class="input-row"><span class="input-label o2">O\u2082 %</span>' +
+      '<input type="number" class="o2-input gp-input" data-id="' + card.id + '" data-field="o2" value="' + card.o2 + '" min="0" max="100"></div>' +
+      '<div class="input-row"><span class="input-label he">He %</span>' +
+      '<input type="number" class="he-input gp-input" data-id="' + card.id + '" data-field="he" value="' + card.he + '" min="0" max="100"></div>' +
+      '<div class="input-row"><span class="input-label">Target psi</span>' +
+      '<input type="number" class="gp-input" data-id="' + card.id + '" data-field="tgtPsi" value="' + card.tgtPsi + '" style="width:70px;"></div>' +
+      '<div class="input-row"><span class="input-label">Top-off O\u2082 %</span>' +
+      '<input type="number" class="o2-input gp-input" data-id="' + card.id + '" data-field="topO2" value="' + card.topO2 + '" style="width:55px;"></div>' +
+      '</div>' +
+      '<div class="gas-card-tags">' +
+      '<button class="gas-tag' + (card.doubles ? ' active' : '') + '" data-id="' + card.id + '" data-toggle="doubles">Doubles</button>' +
+            '<span class="supply-detail" style="margin-left:auto;">' + specText + '</span>' +
+      '</div>';
+
+    const div = document.createElement('div');
+    div.className = 'gas-card';
+    div.innerHTML = html;
+    container.appendChild(div);
+  });
+
+  // Wire events
+  container.querySelectorAll('.gas-card-remove').forEach(btn => {
+    btn.addEventListener('click', () => removeGasCard(parseInt(btn.dataset.id)));
+  });
+  container.querySelectorAll('.gp-input').forEach(input => {
+    const evt = input.tagName === 'SELECT' ? 'change' : 'input';
+    input.addEventListener(evt, () => {
+      const card = gasCards.find(c => c.id === parseInt(input.dataset.id));
+      if (!card) return;
+      const field = input.dataset.field;
+      if (field === 'preset') {
+        card.preset = input.value;
+        const cv = document.getElementById('gp-custom-vol-' + card.id);
+        const cp = document.getElementById('gp-custom-psi-' + card.id);
+        if (cv) cv.style.display = input.value === 'Custom' ? '' : 'none';
+        if (cp) cp.style.display = input.value === 'Custom' ? '' : 'none';
+      } else if (['qty','customVol','customPsi','o2','he','tgtPsi','topO2','topHe'].includes(field)) {
+        card[field] = parseFloat(input.value) || 0;
+      }
+      calcGasPlanning();
+    });
+  });
+  container.querySelectorAll('.gas-tag').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const card = gasCards.find(c => c.id === parseInt(btn.dataset.id));
+      if (!card) return;
+      card[btn.dataset.toggle] = !card[btn.dataset.toggle];
+      renderGasCards();
+      calcGasPlanning();
+    });
+  });
+}
+
+function calcGasPlanning() {
+  const resultsBody = $('gp-results-body');
+  if (gasCards.length === 0) {
+    resultsBody.innerHTML = '<div style="text-align:center; padding:1rem; color:var(--text-dim); font-size:0.9rem;">Add a gas to see results</div>';
+    return;
+  }
+
+  const heType = $('gp-he-type').value;
+  const o2Type = $('gp-o2-type').value;
+  const heRecv = parseFloat($('gp-he-recv').value) || SUPPLY_SPECS[heType].psi;
+  const o2Recv = parseFloat($('gp-o2-recv').value) || SUPPLY_SPECS[o2Type].psi;
+  const floor = parseFloat($('gp-floor').value) || 500;
+
+  const heSpec = SUPPLY_SPECS[heType];
+  const o2Spec = SUPPLY_SPECS[o2Type];
+  const heUsable = heSpec.vol * (heRecv - floor) / heSpec.psi;
+  const o2Usable = o2Spec.vol * (o2Recv - floor) / o2Spec.psi;
+
+  let totalHeCf = 0, totalO2Cf = 0, totalTopCf = 0;
+  let perCard = [];
+
+  gasCards.forEach(card => {
+    const p = card.preset === 'Custom'
+      ? { vol: card.customVol, psi: card.customPsi }
+      : CYLINDER_PRESETS[card.preset];
+    const cylVol = p.vol * (card.doubles ? 2 : 1);
+    const cylRated = p.psi;
+
+    const tgtP = card.tgtPsi;
+    const o2frac = card.o2 / 100;
+    const hefrac = card.he / 100;
+    const n2frac = 1 - o2frac - hefrac;
+    const topO2frac = card.topO2 / 100;
+    const topN2frac = 1 - topO2frac;
+
+    // cf of each gas at surface needed per cylinder
+    const totalCf = cylVol * (tgtP / cylRated);
+
+    // From topoff: N2 fraction determines topoff amount
+    const topCf = topN2frac > 0 ? (n2frac * totalCf) / topN2frac : 0;
+    const o2FromTop = topO2frac * topCf;
+    const heCf = hefrac * totalCf;
+    const o2Cf = o2frac * totalCf - o2FromTop;
+
+    const qty = card.qty;
+    const cardHe = Math.max(0, heCf) * qty;
+    const cardO2 = Math.max(0, o2Cf) * qty;
+    const cardTop = Math.max(0, topCf) * qty;
+
+    totalHeCf += cardHe;
+    totalO2Cf += cardO2;
+    totalTopCf += cardTop;
+
+    perCard.push({
+      label: card.preset + (card.doubles ? ' Dbls' : '') + ' ' + Math.round(card.o2) + '/' + Math.round(card.he),
+      qty: qty,
+      heCf: cardHe,
+      o2Cf: cardO2,
+      topCf: cardTop,
+    });
+  });
+
+  const extraPct = parseFloat($('gp-extra-pct').value) || 0;
+  totalHeCf *= (1 + extraPct / 100);
+  totalO2Cf *= (1 + extraPct / 100);
+  totalTopCf *= (1 + extraPct / 100);
+
+  const heBottles = heUsable > 0 ? totalHeCf / heUsable : 0;
+  const o2Bottles = o2Usable > 0 ? totalO2Cf / o2Usable : 0;
+
+  const heCost = parseFloat($('gp-he-cost').value) || 0;
+  const o2Cost = parseFloat($('gp-o2-cost').value) || 0;
+
+  // Build results HTML
+  let html = '';
+
+  // Per-card breakdown
+  perCard.forEach(pc => {
+    html += '<div style="padding:0.5rem 0; border-bottom:1px solid var(--border);">';
+    html += '<div style="font-size:0.85rem; font-weight:600; color:var(--text); margin-bottom:0.3rem;">' + pc.label + ' \u00d7 ' + pc.qty + '</div>';
+    html += '<div style="display:flex; gap:1rem; font-size:0.8rem;">';
+    html += '<span style="color:var(--he-color);">He: ' + pc.heCf.toFixed(0) + ' cf</span>';
+    html += '<span style="color:var(--o2-color);">O\u2082: ' + pc.o2Cf.toFixed(0) + ' cf</span>';
+    html += '<span style="color:var(--top-color);">Top: ' + pc.topCf.toFixed(0) + ' cf</span>';
+    html += '</div></div>';
+  });
+
+  // Totals
+  html += '<div class="total-row" style="margin-top:0.5rem;">';
+  html += '<span class="total-label he" style="color:var(--he-color);">Total Helium</span>';
+  html += '<span class="total-value" style="color:var(--he-color); background:var(--he-bg);">' + totalHeCf.toFixed(0) + ' cf</span></div>';
+  html += '<div class="total-row">';
+  html += '<span class="total-label o2" style="color:var(--o2-color);">Total Oxygen</span>';
+  html += '<span class="total-value" style="color:var(--o2-color); background:var(--o2-bg);">' + totalO2Cf.toFixed(0) + ' cf</span></div>';
+  html += '<div class="total-row">';
+  html += '<span class="total-label" style="color:var(--top-color);">Total Top-off</span>';
+  html += '<span class="total-value" style="color:var(--top-color); background:var(--top-bg);">' + totalTopCf.toFixed(0) + ' cf</span></div>';
+
+  // Bottles needed
+  html += '<div class="bottles-row" style="margin-top:0.75rem; padding-top:0.75rem; border-top:2px solid var(--border);">';
+  html += '<span style="color:var(--he-color); font-weight:500;">He ' + (heType === 'k' ? 'K-bottles' : 'T-cylinders') + '</span>';
+  html += '<span class="bottles-count" style="color:var(--he-color); background:var(--he-bg);">' + Math.ceil(heBottles) + '</span></div>';
+  html += '<div class="bottles-row">';
+  html += '<span style="color:var(--o2-color); font-weight:500;">O\u2082 ' + (o2Type === 'k' ? 'K-bottles' : 'T-cylinders') + '</span>';
+  html += '<span class="bottles-count" style="color:var(--o2-color); background:var(--o2-bg);">' + Math.ceil(o2Bottles) + '</span></div>';
+
+  // Usable info
+  html += '<div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.5rem;">';
+  html += 'He usable: ' + heUsable.toFixed(0) + ' cf/bottle \u00b7 O\u2082 usable: ' + o2Usable.toFixed(0) + ' cf/bottle</div>';
+
+  // Cost
+  if (heCost > 0 || o2Cost > 0) {
+    const totalHeCost = Math.ceil(heBottles) * heCost;
+    const totalO2Cost = Math.ceil(o2Bottles) * o2Cost;
+    const totalCost = totalHeCost + totalO2Cost;
+    html += '<div class="cost-row" style="margin-top:0.75rem; padding-top:0.75rem; border-top:2px solid var(--border);">';
+    html += '<span style="color:var(--he-color);">He cost</span>';
+    html += '<span class="cost-value">$' + totalHeCost.toFixed(0) + '</span></div>';
+    html += '<div class="cost-row">';
+    html += '<span style="color:var(--o2-color);">O\u2082 cost</span>';
+    html += '<span class="cost-value">$' + totalO2Cost.toFixed(0) + '</span></div>';
+    html += '<div class="cost-row">';
+    html += '<span style="font-weight:700; color:var(--text);">Total gas cost</span>';
+    html += '<span class="cost-value cost-total">$' + totalCost.toFixed(0) + '</span></div>';
+    const totalCyls = gasCards.reduce((a,c) => a + c.qty, 0);
+    if (totalCyls > 0) {
+      html += '<div class="cost-row">';
+      html += '<span style="color:var(--text-dim);">Cost per cylinder</span>';
+      html += '<span class="cost-value">$' + (totalCost / totalCyls).toFixed(0) + '</span></div>';
+    }
+  }
+
+  resultsBody.innerHTML = html;
+}
+
+// Supply type change updates spec display
+$('gp-he-type').addEventListener('change', () => {
+  const s = SUPPLY_SPECS[$('gp-he-type').value];
+  $('gp-he-spec').textContent = s.vol + ' cf @ ' + s.psi;
+  $('gp-he-recv').value = $('gp-he-type').value === 't' ? 2400 : s.psi;
+  calcGasPlanning();
+});
+$('gp-o2-type').addEventListener('change', () => {
+  const s = SUPPLY_SPECS[$('gp-o2-type').value];
+  $('gp-o2-spec').textContent = s.vol + ' cf @ ' + s.psi;
+  $('gp-o2-recv').value = $('gp-o2-type').value === 't' ? 2400 : s.psi;
+  calcGasPlanning();
+});
+['gp-he-recv','gp-o2-recv','gp-floor','gp-he-cost','gp-o2-cost','gp-extra-pct'].forEach(id => {
+  $(id).addEventListener('input', calcGasPlanning);
+});
+
+$('gp-add-gas').addEventListener('click', () => addGasCard());
+
+// Add a default card
+addGasCard({ qty: 4, preset: 'AL80', o2: 10, he: 70, tgtPsi: 3000, topO2: 21 });
+
+
+function recalcAll() { calcBlender(); calcTopoff(); calcModMix(); calcGasPlanning(); }
 
 // === SHARED TOGGLE HANDLERS ===
 setupToggle('global-units', u => {
@@ -1360,11 +1787,6 @@ $('m-end-target').addEventListener('input', () => { onDepthInput('m-end-target')
 ['b-depth','t-depth','m-depth','m-end-target'].forEach(id => initCanonical(id, 'depth'));
 
 recalcAll();
-
-// === PWA SERVICE WORKER ===
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js');
-}
 </script>
 </body>
 </html>
