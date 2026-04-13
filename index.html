@@ -410,6 +410,11 @@
   .cost-value { font-weight: 700; color: var(--warn-color); }
   .cost-total { font-size: 1.1rem; }
 </style>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#282a36">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icon-192.png">
 </head>
 <body>
 <div class="container">
@@ -535,7 +540,7 @@
     <div class="best-i-can-do" id="b-best">
       <div class="error-banner" id="b-error" style="margin:0; border-radius:0; border:none; border-bottom:1px solid var(--err-border);"></div>
       <div class="best-i-can-do-header">
-        <img id="best-img" class="best-img" src="https://i.kym-cdn.com/photos/images/original/002/137/897/75a.jpg" alt="">
+        <img id="best-img" class="best-img" src="img.jpg" alt="">
         <div class="meme-text">Best I can do is...</div>
       </div>
       <div class="best-i-can-do-body">
@@ -729,10 +734,6 @@
               <span class="input-label" style="min-width:28px;">Floor</span>
               <input type="number" class="supply-input" id="gp-floor" value="500"> <span class="supply-detail">psi (empty point)</span>
             </div>
-            <div class="supply-row">
-              <span class="input-label" style="min-width:28px;">Extra</span>
-              <input type="number" class="supply-input" id="gp-extra-pct" value="0" min="0" max="100"> <span class="supply-detail">% contingency</span>
-            </div>
           </div>
         </div>
         <div class="section">
@@ -794,7 +795,12 @@
   </footer>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js">
+// === PWA SERVICE WORKER ===
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+</script><script>
 const PSI_TO_BAR = 0.0689476;
 const FT_TO_M = 0.3048;
 
@@ -1439,7 +1445,7 @@ const CYLINDER_PRESETS = {
   'LP85': { vol: 85, psi: 2640 },
   'HP80': { vol: 80, psi: 3442 },
   'HP100': { vol: 100, psi: 3442 },
-  'HP120': { vol: 119, psi: 3442 },
+  'HP120': { vol: 120, psi: 3442 },
   'Custom': { vol: 80, psi: 3000 },
 };
 
@@ -1460,6 +1466,7 @@ function addGasCard(cfg) {
     customVol: cfg?.customVol || 80,
     customPsi: cfg?.customPsi || 3000,
     doubles: cfg?.doubles || false,
+    ccr: cfg?.ccr || false,
     o2: cfg?.o2 || 21,
     he: cfg?.he || 0,
     tgtPsi: cfg?.tgtPsi || 3000,
@@ -1491,7 +1498,7 @@ function renderGasCards() {
     const specText = card.preset === 'Custom' ? '' : p.vol + ' cf @ ' + p.psi + ' psi';
 
     const html = '<div class="gas-card-header">' +
-      '<span class="gas-card-title">Gas ' + (idx+1) + '</span>' +
+      '<span class="gas-card-title">Gas ' + (idx+1) + (card.ccr ? ' \u00b7 CCR' : '') + '</span>' +
       '<button class="gas-card-remove" data-id="' + card.id + '">\u00d7</button></div>' +
       '<div class="gas-card-body">' +
       '<div class="input-row"><span class="input-label">Qty</span>' +
@@ -1513,7 +1520,8 @@ function renderGasCards() {
       '</div>' +
       '<div class="gas-card-tags">' +
       '<button class="gas-tag' + (card.doubles ? ' active' : '') + '" data-id="' + card.id + '" data-toggle="doubles">Doubles</button>' +
-            '<span class="supply-detail" style="margin-left:auto;">' + specText + '</span>' +
+      '<button class="gas-tag ccr' + (card.ccr ? ' active' : '') + '" data-id="' + card.id + '" data-toggle="ccr">CCR</button>' +
+      '<span class="supply-detail" style="margin-left:auto;">' + specText + '</span>' +
       '</div>';
 
     const div = document.createElement('div');
@@ -1609,18 +1617,13 @@ function calcGasPlanning() {
     totalTopCf += cardTop;
 
     perCard.push({
-      label: card.preset + (card.doubles ? ' Dbls' : '') + ' ' + Math.round(card.o2) + '/' + Math.round(card.he),
+      label: (card.ccr ? 'CCR ' : '') + card.preset + (card.doubles ? ' Dbls' : '') + ' ' + Math.round(card.o2) + '/' + Math.round(card.he),
       qty: qty,
       heCf: cardHe,
       o2Cf: cardO2,
       topCf: cardTop,
     });
   });
-
-  const extraPct = parseFloat($('gp-extra-pct').value) || 0;
-  totalHeCf *= (1 + extraPct / 100);
-  totalO2Cf *= (1 + extraPct / 100);
-  totalTopCf *= (1 + extraPct / 100);
 
   const heBottles = heUsable > 0 ? totalHeCf / heUsable : 0;
   const o2Bottles = o2Usable > 0 ? totalO2Cf / o2Usable : 0;
@@ -1694,23 +1697,23 @@ function calcGasPlanning() {
 $('gp-he-type').addEventListener('change', () => {
   const s = SUPPLY_SPECS[$('gp-he-type').value];
   $('gp-he-spec').textContent = s.vol + ' cf @ ' + s.psi;
-  $('gp-he-recv').value = $('gp-he-type').value === 't' ? 2400 : s.psi;
+  $('gp-he-recv').value = s.psi;
   calcGasPlanning();
 });
 $('gp-o2-type').addEventListener('change', () => {
   const s = SUPPLY_SPECS[$('gp-o2-type').value];
   $('gp-o2-spec').textContent = s.vol + ' cf @ ' + s.psi;
-  $('gp-o2-recv').value = $('gp-o2-type').value === 't' ? 2400 : s.psi;
+  $('gp-o2-recv').value = s.psi;
   calcGasPlanning();
 });
-['gp-he-recv','gp-o2-recv','gp-floor','gp-he-cost','gp-o2-cost','gp-extra-pct'].forEach(id => {
+['gp-he-recv','gp-o2-recv','gp-floor','gp-he-cost','gp-o2-cost'].forEach(id => {
   $(id).addEventListener('input', calcGasPlanning);
 });
 
 $('gp-add-gas').addEventListener('click', () => addGasCard());
 
 // Add a default card
-addGasCard({ qty: 4, preset: 'AL80', o2: 10, he: 70, tgtPsi: 3000, topO2: 21 });
+addGasCard({ qty: 4, preset: 'HP100', o2: 10, he: 70, tgtPsi: 3000, topO2: 21 });
 
 
 function recalcAll() { calcBlender(); calcTopoff(); calcModMix(); calcGasPlanning(); }
@@ -1787,6 +1790,11 @@ $('m-end-target').addEventListener('input', () => { onDepthInput('m-end-target')
 ['b-depth','t-depth','m-depth','m-end-target'].forEach(id => initCanonical(id, 'depth'));
 
 recalcAll();
+
+// === PWA SERVICE WORKER ===
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
 </script>
 </body>
 </html>

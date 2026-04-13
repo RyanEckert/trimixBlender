@@ -1,13 +1,22 @@
-This implements an (optional) iterative Z-factor calculation to account for differning compressibilities of gases and their changes at different pressures (and ambient temperatures).
+# Trimix Blender PWA
 
-The idea is you can switch between "ideal" and "real" gas laws to (hopefully) get as accurate a gas mix as possible. 
-(Though honestly, the differences between most mixes is probably negligible given the allowable error in gas analyzers).<br>
-This, of course, assumes you allow cylinders to cool down completely between gases, so YMMV. <br>
+## Files
+- `index.html` — the calculator
+- `manifest.json` — PWA config
+- `sw.js` — service worker (offline caching)
+- `icon-192.png` / `icon-512.png` — app icons
+- `img.jpg` — YOU ADD THIS (the "best I can do" meme image)
 
-I think this works as intended.<br>
+## Setup
 
-Feel free to reach out and I can try to fix any issues.
-***
-☠️ **Don't do anything stupid** ☠️
-***
-https://ryaneckert.github.io/trimixBlender/
+1. Add your `img.jpg` (the meme image) to this folder
+2. Push all files to a GitHub Pages repo
+3. Visit the URL once on your phone
+4. Add to Home Screen
+5. Done — works offline forever
+
+## Updating
+
+1. Edit files, push to GitHub
+2. Change `CACHE_NAME` in `sw.js` from `v1` to `v2` (forces cache refresh)
+3. Next time the app opens with any connectivity, it updates automatically
