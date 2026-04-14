@@ -1,6 +1,6 @@
 {
   "name": "Trimix Blender",
-  "short_name": "TxBlender",
+  "short_name": "TmxBlender",
   "description": "Trimix partial pressure blending calculator",
   "start_url": "./index.html",
   "display": "standalone",
