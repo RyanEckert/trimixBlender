@@ -84,7 +84,12 @@
   .toggle button.active { background: var(--surface-raised); color: var(--text); }
 
   .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.75rem; }
-  @media (max-width: 680px) { .calc-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 680px) {
+  .calc-grid { grid-template-columns: 1fr; }
+  .tabs { flex-wrap: wrap; }
+  .tab { flex: 1 1 45%; font-size: 0.85rem; padding: 0.6rem 0.4rem; }
+}
+
   .col { display: flex; flex-direction: column; gap: 1.5rem; }
 
   .section { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; transition: border-color 0.2s; }
