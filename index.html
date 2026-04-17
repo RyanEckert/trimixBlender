@@ -415,11 +415,6 @@
   .cost-value { font-weight: 700; color: var(--warn-color); }
   .cost-total { font-size: 1.1rem; }
 </style>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#282a36">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon-512.png">
 </head>
 <body>
 <div class="container">
@@ -706,35 +701,47 @@
 
   <!-- ==================== GAS PLANNING ==================== -->
   <div id="gasplan" class="tab-content">
+    <!-- SHOP FILLS -->
+    <div class="section" style="margin-bottom:1.5rem;">
+      <div class="section-header">Shop Fills (pre-trip)</div>
+      <div class="section-body">
+        <div class="gas-cards" id="gp-shop-cards"></div>
+        <button class="add-gas-btn" id="gp-shop-add">+ Add Shop Fill</button>
+      </div>
+    </div>
+    <!-- BOAT FILLS -->
+    <div class="section" style="margin-bottom:1.5rem;">
+      <div class="section-header">Boat Fills (field)</div>
+      <div class="section-body">
+
+        <div class="gas-cards" id="gp-boat-cards"></div>
+        <button class="add-gas-btn" id="gp-boat-add">+ Add Boat Fill</button>
+      </div>
+    </div>
+    <!-- SUPPLY & RESULTS -->
     <div class="calc-grid">
       <div class="col">
-        <div class="gas-cards" id="gp-cards"></div>
-        <button class="add-gas-btn" id="gp-add-gas">+ Add Gas</button>
-      </div>
-      <div class="col">
         <div class="section">
-          <div class="section-header">Supply Cylinders</div>
+          <div class="section-header">Shop Supply (order from supplier)</div>
           <div class="section-body">
             <div class="supply-row">
               <span class="input-label he" style="min-width:28px;">He</span>
-              <select class="supply-select" id="gp-he-type">
-                <option value="k">K-bottle</option>
-                <option value="t">T-cylinder</option>
-              </select>
-              <span class="supply-detail"><span id="gp-he-spec">249 cf @ 2200</span></span>
+              <select class="supply-select" id="gp-shop-he-type"></select>
               <span class="supply-detail">Recv:</span>
-              <input type="number" class="supply-input" id="gp-he-recv" value="2200"> <span class="supply-detail">psi</span>
+              <input type="number" class="supply-input" id="gp-shop-he-recv" value="2200"> <span class="supply-detail">psi</span>
             </div>
             <div class="supply-row">
               <span class="input-label o2" style="min-width:28px;">O₂</span>
-              <select class="supply-select" id="gp-o2-type">
-                <option value="k">K-bottle</option>
-                <option value="t">T-cylinder</option>
-              </select>
-              <span class="supply-detail"><span id="gp-o2-spec">249 cf @ 2200</span></span>
+              <select class="supply-select" id="gp-shop-o2-type"></select>
               <span class="supply-detail">Recv:</span>
-              <input type="number" class="supply-input" id="gp-o2-recv" value="2200"> <span class="supply-detail">psi</span>
+              <input type="number" class="supply-input" id="gp-shop-o2-recv" value="2200"> <span class="supply-detail">psi</span>
             </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-header">Settings</div>
+          <div class="section-body">
             <div class="supply-row">
               <span class="input-label" style="min-width:28px;">Floor</span>
               <input type="number" class="supply-input" id="gp-floor" value="500"> <span class="supply-detail">psi (empty point)</span>
@@ -743,21 +750,18 @@
               <span class="input-label" style="min-width:28px;">Extra</span>
               <input type="number" class="supply-input" id="gp-extra-pct" value="0" min="0" max="100"> <span class="supply-detail">% contingency</span>
             </div>
-          </div>
-        </div>
-        <div class="section">
-          <div class="section-header">Cost (optional)</div>
-          <div class="section-body">
-            <div class="input-row">
-              <span class="input-label he">He per bottle ($)</span>
-              <input type="number" class="he-input" id="gp-he-cost" value="" placeholder="—" min="0">
+            <div class="supply-row">
+              <span class="input-label he" style="min-width:28px;">He $</span>
+              <input type="number" class="supply-input" id="gp-he-cost" value="" placeholder="—" min="0"> <span class="supply-detail">per bottle</span>
             </div>
-            <div class="input-row">
-              <span class="input-label o2">O₂ per bottle ($)</span>
-              <input type="number" class="o2-input" id="gp-o2-cost" value="" placeholder="—" min="0">
+            <div class="supply-row">
+              <span class="input-label o2" style="min-width:28px;">O₂ $</span>
+              <input type="number" class="supply-input" id="gp-o2-cost" value="" placeholder="—" min="0"> <span class="supply-detail">per bottle</span>
             </div>
           </div>
         </div>
+      </div>
+      <div class="col">
         <div class="section gas-totals" id="gp-results">
           <div class="section-header">Results</div>
           <div class="section-body" id="gp-results-body">
@@ -899,12 +903,12 @@ function calcBlendZ(curPsi, curO2, curHe, tgtPsi, tgtO2, tgtHe, topO2, topHe, o2
   // dnO2Src * (o2SrcN2/100) + dnTop * (topN2/100) = nN2t - nN2s
   // dnO2Src * (o2SrcO2/100) + dnTop * (topO2/100) + dnTop * 0 = nO2t - nO2s (O2 from topoff)
   // Wait, topoff He also contributes. Need to account for all He from topoff too.
-
+  
   // Actually let me simplify. The total mole balance:
   // He:  dnHePure + dnTop*(topHe/100) = nHet - nHes
   // O2:  dnO2Src*(o2SrcO2/100) + dnTop*(topO2/100) = nO2t - nO2s
   // N2:  dnO2Src*(o2SrcN2/100) + dnTop*(topN2/100) = nN2t - nN2s
-
+  
   // From He: dnHePure = (nHet - nHes) - dnTop*(topHe/100)
   // From N2: dnO2Src = (dnN2_need - dnTop*(topN2/100)) / (o2SrcN2/100)
   //   where dnN2_need = nN2t - nN2s
@@ -912,13 +916,13 @@ function calcBlendZ(curPsi, curO2, curHe, tgtPsi, tgtO2, tgtHe, topO2, topHe, o2
   // Solve for dnTop:
   // dnO2_need = dnN2_need * o2SrcO2/o2SrcN2 - dnTop * topN2/100 * o2SrcO2/o2SrcN2 + dnTop * topO2/100
   // dnTop * (topO2/100 - topN2/100 * o2SrcO2/o2SrcN2) = dnO2_need - dnN2_need * o2SrcO2/o2SrcN2
-
+  
   const dnO2_need = nO2t - nO2s;
   const dnN2_need = nN2t - nN2s;
   const dnHe_need = nHet - nHes;
-
+  
   let dnTop, dnO2Src;
-
+  
   if (o2SrcN2 > 0 && topN2 > 0) {
     const ratio = o2SrcO2 / o2SrcN2;
     const denom = topO2/100 - topN2/100 * ratio + topHe/100 * 0; // topHe doesn't affect this eq
@@ -948,7 +952,7 @@ function calcBlendZ(curPsi, curO2, curHe, tgtPsi, tgtO2, tgtHe, topO2, topHe, o2
     dnTop = 0;
     dnO2Src = dnN2_need > 0 ? dnN2_need / (o2SrcN2/100) : 0;
   }
-
+  
   const dnHePureFinal = dnHe_need - dnTop * topHe/100;
 
   const feasible = dnHePureFinal >= -0.5 && dnO2Src >= -0.5 && dnTop >= -0.5;
@@ -1079,7 +1083,7 @@ function calcBlendBanked(topO2, topHe, topN2, startP, curO2, curHe, curN2, tgtP,
   const ppO2f = tgtO2/100*tgtP, ppHef = tgtHe/100*tgtP, ppN2f = tgtN2/100*tgtP;
   const ppO2h = curO2/100*startP, ppHeh = curHe/100*startP, ppN2h = curN2/100*startP;
   const dnO2 = ppO2f - ppO2h, dnHe = ppHef - ppHeh, dnN2 = ppN2f - ppN2h;
-
+  
   // Solve: S*(o2SrcO2/100) + T*(topO2/100) = dnO2
   //        S*(o2SrcN2/100) + T*(topN2/100) = dnN2
   //        heAdd = dnHe - T*(topHe/100)
@@ -1453,16 +1457,33 @@ const CYLINDER_PRESETS = {
   'Custom': { vol: 80, psi: 3000 },
 };
 
-const SUPPLY_SPECS = {
-  k: { vol: 249, psi: 2200 },
-  t: { vol: 330, psi: 2640 },
+const SUPPLY_PRESETS = {
+  'K-bottle': { vol: 249, psi: 2200 },
+  'T-cylinder': { vol: 330, psi: 2640 },
+  'AL80': { vol: 77.4, psi: 3000 },
+  'HP80': { vol: 80, psi: 3442 },
+  'HP100': { vol: 100, psi: 3442 },
+  'HP120': { vol: 119, psi: 3442 },
+  'Twin 80s': { vol: 154.8, psi: 3000 },
+  'Twin 100s': { vol: 200, psi: 3442 },
+  'Twin 120s': { vol: 238, psi: 3442 },
 };
 
-let gasCards = [];
-let gasCardId = 0;
+let shopCards = [], boatCards = [];
+let cardIdCounter = 0;
 
-function addGasCard(cfg) {
-  const id = gasCardId++;
+function populateSupplyDropdowns() {
+  const opts = Object.keys(SUPPLY_PRESETS).map(k => '<option value="' + k + '">' + k + '</option>').join('');
+  ['gp-shop-he-type','gp-shop-o2-type'].forEach(id => {
+    $(id).innerHTML = opts;
+  });
+  // Defaults
+  $('gp-shop-he-type').value = 'K-bottle';
+  $('gp-shop-o2-type').value = 'K-bottle';
+}
+
+function createCard(pool, cfg) {
+  const id = cardIdCounter++;
   const card = {
     id,
     qty: cfg?.qty || 1,
@@ -1475,262 +1496,365 @@ function addGasCard(cfg) {
     tgtPsi: cfg?.tgtPsi || 3000,
     topO2: cfg?.topO2 || 21,
     topHe: cfg?.topHe || 0,
+    // Boat-specific: cf per fill instead of cylinder
+    cfPerFill: cfg?.cfPerFill || 0,
+    usePerFill: cfg?.usePerFill || false,
+    cylCf: cfg?.cylCf || 20,
+    endingCf: cfg?.endingCf || 10,
+    bankType: cfg?.bankType || 'Twin 80s',
+    bankRecv: cfg?.bankRecv || 3000,
+    divers: cfg?.divers || 4,
+    dpd: cfg?.dpd || 2,
+    days: cfg?.days || 7,
   };
-  gasCards.push(card);
-  renderGasCards();
-  calcGasPlanning();
-  return id;
+  pool.push(card);
+  return card;
 }
 
-function removeGasCard(id) {
-  gasCards = gasCards.filter(c => c.id !== id);
-  renderGasCards();
-  calcGasPlanning();
+function removeCard(pool, id) {
+  const idx = pool.findIndex(c => c.id === id);
+  if (idx >= 0) pool.splice(idx, 1);
 }
 
-function renderGasCards() {
-  const container = $('gp-cards');
+function renderCards(pool, containerId, isBoat) {
+  const container = $(containerId);
   container.innerHTML = '';
-  gasCards.forEach((card, idx) => {
+
+  pool.forEach((card, idx) => {
     const presetOpts = Object.keys(CYLINDER_PRESETS).map(k =>
       '<option value="' + k + '"' + (card.preset === k ? ' selected' : '') + '>' + k + '</option>'
     ).join('');
-
-    const customDisplay = card.preset === 'Custom' ? '' : 'display:none;';
+    const customShow = card.preset === 'Custom' ? '' : 'display:none;';
     const p = CYLINDER_PRESETS[card.preset] || CYLINDER_PRESETS['AL80'];
-    const specText = card.preset === 'Custom' ? '' : p.vol + ' cf @ ' + p.psi + ' psi';
 
-    const html = '<div class="gas-card-header">' +
+    let html = '<div class="gas-card-header">' +
       '<span class="gas-card-title">Gas ' + (idx+1) + '</span>' +
       '<button class="gas-card-remove" data-id="' + card.id + '">\u00d7</button></div>' +
-      '<div class="gas-card-body">' +
-      '<div class="input-row"><span class="input-label">Qty</span>' +
-      '<input type="number" class="gp-input" data-id="' + card.id + '" data-field="qty" value="' + card.qty + '" min="1" style="width:50px;"></div>' +
-      '<div class="input-row"><span class="input-label">Cylinder</span>' +
-      '<select class="supply-select gp-input" data-id="' + card.id + '" data-field="preset">' + presetOpts + '</select></div>' +
-      '<div class="input-row" style="' + customDisplay + '" id="gp-custom-vol-' + card.id + '"><span class="input-label">Vol (cf)</span>' +
-      '<input type="number" class="gp-input" data-id="' + card.id + '" data-field="customVol" value="' + card.customVol + '" style="width:65px;"></div>' +
-      '<div class="input-row" style="' + customDisplay + '" id="gp-custom-psi-' + card.id + '"><span class="input-label">Rated psi</span>' +
-      '<input type="number" class="gp-input" data-id="' + card.id + '" data-field="customPsi" value="' + card.customPsi + '" style="width:65px;"></div>' +
-      '<div class="input-row"><span class="input-label o2">O\u2082 %</span>' +
-      '<input type="number" class="o2-input gp-input" data-id="' + card.id + '" data-field="o2" value="' + card.o2 + '" min="0" max="100"></div>' +
+      '<div class="gas-card-body">';
+
+    if (isBoat) {
+      // Boat card: trip params + consumption
+      html += '<div class="input-row"><span class="input-label">Divers</span>' +
+        '<input type="number" class="gc-input" data-id="' + card.id + '" data-field="divers" value="' + card.divers + '" min="1" style="width:50px;"></div>' +
+        '<div class="input-row"><span class="input-label">Dives/day</span>' +
+        '<input type="number" class="gc-input" data-id="' + card.id + '" data-field="dpd" value="' + card.dpd + '" min="1" style="width:50px;"></div>' +
+        '<div class="input-row"><span class="input-label">Days</span>' +
+        '<input type="number" class="gc-input" data-id="' + card.id + '" data-field="days" value="' + card.days + '" min="1" style="width:50px;"></div>' +
+        '<div class="input-row"><span class="input-label">Cylinder cf</span>' +
+        '<input type="number" class="gc-input" data-id="' + card.id + '" data-field="cylCf" value="' + card.cylCf + '" style="width:60px;"></div>' +
+        '<div class="input-row"><span class="input-label">Ending cf</span>' +
+        '<input type="number" class="gc-input" data-id="' + card.id + '" data-field="endingCf" value="' + card.endingCf + '" style="width:60px;"></div>' +
+        '<div class="input-row"><span class="input-label" style="color:var(--text-muted); font-style:italic;">cf / fill</span>' +
+        '<span class="derived">' + Math.max(0, card.cylCf - card.endingCf).toFixed(0) + '</span></div>';
+
+      // Bank source per card
+      const bankOpts = Object.keys(SUPPLY_PRESETS).map(k =>
+        '<option value="' + k + '"' + (card.bankType === k ? ' selected' : '') + '>' + k + '</option>'
+      ).join('');
+      html += '<div class="input-row"><span class="input-label">Bank in</span>' +
+        '<select class="supply-select gc-input" data-id="' + card.id + '" data-field="bankType">' + bankOpts + '</select></div>' +
+        '<div class="input-row"><span class="input-label">Bank recv psi</span>' +
+        '<input type="number" class="gc-input" data-id="' + card.id + '" data-field="bankRecv" value="' + card.bankRecv + '" style="width:65px;"></div>';
+    } else {
+      // Shop card: always cylinder-based
+      html += '<div class="input-row"><span class="input-label">Qty</span>' +
+        '<input type="number" class="gc-input" data-id="' + card.id + '" data-field="qty" value="' + card.qty + '" min="1" style="width:50px;"></div>' +
+        '<div class="input-row"><span class="input-label">Cylinder</span>' +
+        '<select class="supply-select gc-input" data-id="' + card.id + '" data-field="preset">' + presetOpts + '</select></div>' +
+        '<div class="input-row" style="' + customShow + '" id="gc-cv-' + card.id + '"><span class="input-label">Vol (cf)</span>' +
+        '<input type="number" class="gc-input" data-id="' + card.id + '" data-field="customVol" value="' + card.customVol + '" style="width:60px;"></div>' +
+        '<div class="input-row" style="' + customShow + '" id="gc-cp-' + card.id + '"><span class="input-label">Rated psi</span>' +
+        '<input type="number" class="gc-input" data-id="' + card.id + '" data-field="customPsi" value="' + card.customPsi + '" style="width:60px;"></div>' +
+        '<div class="input-row"><span class="input-label">Target psi</span>' +
+        '<input type="number" class="gc-input" data-id="' + card.id + '" data-field="tgtPsi" value="' + card.tgtPsi + '" style="width:65px;"></div>';
+    }
+
+    // Mix inputs (always shown)
+    html += '<div class="input-row"><span class="input-label o2">O\u2082 %</span>' +
+      '<input type="number" class="o2-input gc-input" data-id="' + card.id + '" data-field="o2" value="' + card.o2 + '" min="0" max="100"></div>' +
       '<div class="input-row"><span class="input-label he">He %</span>' +
-      '<input type="number" class="he-input gp-input" data-id="' + card.id + '" data-field="he" value="' + card.he + '" min="0" max="100"></div>' +
-      '<div class="input-row"><span class="input-label">Target psi</span>' +
-      '<input type="number" class="gp-input" data-id="' + card.id + '" data-field="tgtPsi" value="' + card.tgtPsi + '" style="width:70px;"></div>' +
+      '<input type="number" class="he-input gc-input" data-id="' + card.id + '" data-field="he" value="' + card.he + '" min="0" max="100"></div>' +
       '<div class="input-row"><span class="input-label">Top-off O\u2082 %</span>' +
-      '<input type="number" class="o2-input gp-input" data-id="' + card.id + '" data-field="topO2" value="' + card.topO2 + '" style="width:55px;"></div>' +
-      '</div>' +
-      '<div class="gas-card-tags">' +
-      '<button class="gas-tag' + (card.doubles ? ' active' : '') + '" data-id="' + card.id + '" data-toggle="doubles">Doubles</button>' +
-            '<span class="supply-detail" style="margin-left:auto;">' + specText + '</span>' +
-      '</div>';
+      '<input type="number" class="o2-input gc-input" data-id="' + card.id + '" data-field="topO2" value="' + card.topO2 + '" style="width:55px;"></div>';
+
+    html += '</div>'; // close body
+
+    // Tags
+    if (!isBoat) {
+      html += '<div class="gas-card-tags">' +
+        '<button class="gas-tag' + (card.doubles ? ' active' : '') + '" data-id="' + card.id + '" data-toggle="doubles">Doubles</button>' +
+        '</div>';
+    }
 
     const div = document.createElement('div');
     div.className = 'gas-card';
     div.innerHTML = html;
     container.appendChild(div);
   });
+}
 
-  // Wire events
-  container.querySelectorAll('.gas-card-remove').forEach(btn => {
-    btn.addEventListener('click', () => removeGasCard(parseInt(btn.dataset.id)));
-  });
-  container.addEventListener('input', (e) => {
-    if (!e.target.classList.contains('gp-input')) return;
-    const input = e.target;
-    const card = gasCards.find(c => c.id === parseInt(input.dataset.id));
+function wireCardEvents(pool, containerId, isBoat) {
+  const container = $(containerId);
+  // Use event delegation
+  container.onclick = (e) => {
+    const rm = e.target.closest('.gas-card-remove');
+    if (rm) { removeCard(pool, parseInt(rm.dataset.id)); renderCards(pool, containerId, isBoat); wireCardEvents(pool, containerId, isBoat); calcGasPlanning(); return; }
+    const tag = e.target.closest('.gas-tag');
+    if (tag) {
+      const card = pool.find(c => c.id === parseInt(tag.dataset.id));
+      if (card) { card[tag.dataset.toggle] = !card[tag.dataset.toggle]; renderCards(pool, containerId, isBoat); wireCardEvents(pool, containerId, isBoat); calcGasPlanning(); }
+    }
+  };
+  container.oninput = (e) => {
+    const input = e.target.closest('.gc-input');
+    if (!input) return;
+    const card = pool.find(c => c.id === parseInt(input.dataset.id));
     if (!card) return;
     const field = input.dataset.field;
     if (field === 'preset') {
       card.preset = input.value;
-      const cv = document.getElementById('gp-custom-vol-' + card.id);
-      const cp = document.getElementById('gp-custom-psi-' + card.id);
-      if (cv) cv.style.display = input.value === 'Custom' ? '' : 'none';
-      if (cp) cp.style.display = input.value === 'Custom' ? '' : 'none';
-    } else if (['qty','customVol','customPsi','o2','he','tgtPsi','topO2','topHe'].includes(field)) {
+      renderCards(pool, containerId, isBoat); wireCardEvents(pool, containerId, isBoat);
+    } else if (field === 'bankType') {
+      card.bankType = input.value;
+      const spec = SUPPLY_PRESETS[input.value];
+      if (spec) card.bankRecv = input.value === 'T-cylinder' ? 2400 : spec.psi;
+      renderCards(pool, containerId, isBoat); wireCardEvents(pool, containerId, isBoat);
+    } else if (['qty','customVol','customPsi','o2','he','tgtPsi','topO2','topHe','cfPerFill','cylCf','endingCf','bankRecv','divers','dpd','days'].includes(field)) {
       card[field] = parseFloat(input.value) || 0;
+      if (field === 'cylCf' || field === 'endingCf') {
+        renderCards(pool, containerId, isBoat); wireCardEvents(pool, containerId, isBoat);
+      }
     }
     calcGasPlanning();
-  });
-  container.addEventListener('change', (e) => {
-    if (!e.target.classList.contains('gp-input')) return;
-    const input = e.target;
-    const card = gasCards.find(c => c.id === parseInt(input.dataset.id));
-    if (!card) return;
-    if (input.dataset.field === 'preset') {
-      card.preset = input.value;
-      renderGasCards();
-      calcGasPlanning();
-    }
-  });
-  container.querySelectorAll('.gas-tag').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const card = gasCards.find(c => c.id === parseInt(btn.dataset.id));
-      if (!card) return;
-      card[btn.dataset.toggle] = !card[btn.dataset.toggle];
-      renderGasCards();
-      calcGasPlanning();
-    });
-  });
+  };
+  container.onchange = container.oninput; // for selects
 }
 
-function calcGasPlanning() {
-  const resultsBody = $('gp-results-body');
-  if (gasCards.length === 0) {
-    resultsBody.innerHTML = '<div style="text-align:center; padding:1rem; color:var(--text-dim); font-size:0.9rem;">Add a gas to see results</div>';
-    return;
-  }
-
-  const heType = $('gp-he-type').value;
-  const o2Type = $('gp-o2-type').value;
-  const heRecv = parseFloat($('gp-he-recv').value) || SUPPLY_SPECS[heType].psi;
-  const o2Recv = parseFloat($('gp-o2-recv').value) || SUPPLY_SPECS[o2Type].psi;
-  const floor = parseFloat($('gp-floor').value) || 500;
-
-  const heSpec = SUPPLY_SPECS[heType];
-  const o2Spec = SUPPLY_SPECS[o2Type];
-  const heUsable = heSpec.vol * (heRecv - floor) / heSpec.psi;
-  const o2Usable = o2Spec.vol * (o2Recv - floor) / o2Spec.psi;
-
-  let totalHeCf = 0, totalO2Cf = 0, totalTopCf = 0;
-  let perCard = [];
-
-  gasCards.forEach(card => {
+function cardGasCf(card, isBoat, multiplier) {
+  let totalCf;
+  if (isBoat) {
+    const cfPerFill = Math.max(0, card.cylCf - card.endingCf);
+    totalCf = cfPerFill * multiplier;
+  } else {
     const p = card.preset === 'Custom'
       ? { vol: card.customVol, psi: card.customPsi }
       : CYLINDER_PRESETS[card.preset];
     const cylVol = p.vol * (card.doubles ? 2 : 1);
-    const cylRated = p.psi;
+    totalCf = cylVol * (card.tgtPsi / p.psi) * card.qty;
+  }
+  const o2frac = card.o2/100, hefrac = card.he/100, n2frac = 1-o2frac-hefrac;
+  const topO2frac = card.topO2/100, topN2frac = 1-topO2frac;
+  const topCf = topN2frac > 0 ? (n2frac * totalCf) / topN2frac : 0;
+  const o2FromTop = topO2frac * topCf;
+  const heCf = hefrac * totalCf;
+  const o2Cf = o2frac * totalCf - o2FromTop;
+  const mixName = Math.round(card.o2) + '/' + Math.round(card.he);
+  const fills = isBoat ? multiplier : card.qty;
+  return { heCf: Math.max(0,heCf), o2Cf: Math.max(0,o2Cf), topCf: Math.max(0,topCf), totalCf, mixName, fills };
+}
 
-    const tgtP = card.tgtPsi;
-    const o2frac = card.o2 / 100;
-    const hefrac = card.he / 100;
-    const n2frac = 1 - o2frac - hefrac;
-    const topO2frac = card.topO2 / 100;
-    const topN2frac = 1 - topO2frac;
+function supplyUsable(typeId, recvId) {
+  const typeName = $(typeId).value;
+  const spec = SUPPLY_PRESETS[typeName];
+  if (!spec) return { name: typeName, usable: 0 };
+  const recv = parseFloat($(recvId).value) || spec.psi;
+  const floor = parseFloat($('gp-floor').value) || 500;
+  return { name: typeName, usable: spec.vol * (recv - floor) / spec.psi, recv };
+}
 
-    // cf of each gas at surface needed per cylinder
-    const totalCf = cylVol * (tgtP / cylRated);
+function calcGasPlanning() {
+  const resultsBody = $('gp-results-body');
+  if (shopCards.length === 0 && boatCards.length === 0) {
+    resultsBody.innerHTML = '<div style="text-align:center; padding:1rem; color:var(--text-dim); font-size:0.9rem;">Add a gas to see results</div>';
+    return;
+  }
 
-    // From topoff: N2 fraction determines topoff amount
-    const topCf = topN2frac > 0 ? (n2frac * totalCf) / topN2frac : 0;
-    const o2FromTop = topO2frac * topCf;
-    const heCf = hefrac * totalCf;
-    const o2Cf = o2frac * totalCf - o2FromTop;
+  // Boat multiplier is per-card now
+  const extraPct = parseFloat($('gp-extra-pct').value) || 0;
 
-    const qty = card.qty;
-    const cardHe = Math.max(0, heCf) * qty;
-    const cardO2 = Math.max(0, o2Cf) * qty;
-    const cardTop = Math.max(0, topCf) * qty;
-
-    totalHeCf += cardHe;
-    totalO2Cf += cardO2;
-    totalTopCf += cardTop;
-
-    perCard.push({
-      label: card.preset + (card.doubles ? ' Dbls' : '') + ' ' + Math.round(card.o2) + '/' + Math.round(card.he),
-      qty: qty,
-      heCf: cardHe,
-      o2Cf: cardO2,
-      topCf: cardTop,
-    });
+  // Shop totals
+  let shopHe = 0, shopO2 = 0, shopTop = 0;
+  let shopDetails = [];
+  shopCards.forEach(card => {
+    const g = cardGasCf(card, false, 1);
+    shopHe += g.heCf; shopO2 += g.o2Cf; shopTop += g.topCf;
+    shopDetails.push({ label: card.qty + '\u00d7 ' + (card.doubles ? 'Dbl ' : '') + card.preset + ' ' + g.mixName, ...g });
   });
 
-  const extraPct = parseFloat($('gp-extra-pct').value) || 0;
-  totalHeCf *= (1 + extraPct / 100);
-  totalO2Cf *= (1 + extraPct / 100);
-  totalTopCf *= (1 + extraPct / 100);
+  // Boat totals
+  let boatHe = 0, boatO2 = 0, boatTop = 0;
+  let boatDetails = [];
+  let boatMixes = {};
+  boatCards.forEach(card => {
+    const cardMult = (card.divers || 1) * (card.dpd || 1) * (card.days || 1);
+    const g = cardGasCf(card, true, cardMult);
+    boatHe += g.heCf; boatO2 += g.o2Cf; boatTop += g.topCf;
+    const cfUsed = Math.max(0, card.cylCf - card.endingCf);
+    const desc = cfUsed + ' cf/fill';
+    const bankType = card.bankType;
+    const bankRecv = card.bankRecv;
+    boatDetails.push({ label: g.mixName + ' \u00b7 ' + g.fills + ' fills (' + (card.divers||1) + ' divers \u00d7 ' + (card.dpd||1) + '/day \u00d7 ' + (card.days||1) + 'd)', bankType, bankRecv, ...g });
+    // Track total cf per mix
+    if (!boatMixes[g.mixName]) boatMixes[g.mixName] = 0;
+    boatMixes[g.mixName] += g.totalCf;
+  });
 
-  const heBottles = heUsable > 0 ? totalHeCf / heUsable : 0;
-  const o2Bottles = o2Usable > 0 ? totalO2Cf / o2Usable : 0;
+  // Apply contingency
+  const rawShopHe = shopHe, rawShopO2 = shopO2;
+  const rawBoatHe = boatHe, rawBoatO2 = boatO2;
+  shopHe *= (1 + extraPct/100); shopO2 *= (1 + extraPct/100);
+  boatHe *= (1 + extraPct/100); boatO2 *= (1 + extraPct/100);
 
+  // Supply info
+  const shopHeSup = supplyUsable('gp-shop-he-type', 'gp-shop-he-recv');
+  const shopO2Sup = supplyUsable('gp-shop-o2-type', 'gp-shop-o2-recv');
+
+
+  const shopHeBottles = shopHeSup.usable > 0 ? Math.ceil(shopHe / shopHeSup.usable) : 0;
+  const shopO2Bottles = shopO2Sup.usable > 0 ? Math.ceil(shopO2 / shopO2Sup.usable) : 0;
+
+
+  const extraTag = extraPct > 0 ? ' (+' + extraPct + '%)' : '';
+  const cfLabel = (raw, adj) => extraPct > 0 ? raw.toFixed(0) + ' cf (' + adj.toFixed(0) + ' cf' + extraTag + ')' : adj.toFixed(0) + ' cf';
+
+  // Cost
   const heCost = parseFloat($('gp-he-cost').value) || 0;
   const o2Cost = parseFloat($('gp-o2-cost').value) || 0;
 
-  // Build results HTML
+  // Build HTML
   let html = '';
 
-  // Per-card breakdown
-  perCard.forEach(pc => {
-    html += '<div style="padding:0.5rem 0; border-bottom:1px solid var(--border);">';
-    html += '<div style="font-size:0.85rem; font-weight:600; color:var(--text); margin-bottom:0.3rem;">' + pc.label + ' \u00d7 ' + pc.qty + '</div>';
-    html += '<div style="display:flex; gap:1rem; font-size:0.8rem;">';
-    html += '<span style="color:var(--he-color);">He: ' + pc.heCf.toFixed(0) + ' cf</span>';
-    html += '<span style="color:var(--o2-color);">O\u2082: ' + pc.o2Cf.toFixed(0) + ' cf</span>';
-    html += '<span style="color:var(--top-color);">Top: ' + pc.topCf.toFixed(0) + ' cf</span>';
-    html += '</div></div>';
-  });
-
-  // Totals
-  html += '<div class="total-row" style="margin-top:0.5rem;">';
-  html += '<span class="total-label he" style="color:var(--he-color);">Total Helium</span>';
-  html += '<span class="total-value" style="color:var(--he-color); background:var(--he-bg);">' + totalHeCf.toFixed(0) + ' cf</span></div>';
-  html += '<div class="total-row">';
-  html += '<span class="total-label o2" style="color:var(--o2-color);">Total Oxygen</span>';
-  html += '<span class="total-value" style="color:var(--o2-color); background:var(--o2-bg);">' + totalO2Cf.toFixed(0) + ' cf</span></div>';
-  html += '<div class="total-row">';
-  html += '<span class="total-label" style="color:var(--top-color);">Total Top-off</span>';
-  html += '<span class="total-value" style="color:var(--top-color); background:var(--top-bg);">' + totalTopCf.toFixed(0) + ' cf</span></div>';
-
-  // Bottles needed
-  html += '<div class="bottles-row" style="margin-top:0.75rem; padding-top:0.75rem; border-top:2px solid var(--border);">';
-  html += '<span style="color:var(--he-color); font-weight:500;">He ' + (heType === 'k' ? 'K-bottles' : 'T-cylinders') + '</span>';
-  html += '<span class="bottles-count" style="color:var(--he-color); background:var(--he-bg);">' + Math.ceil(heBottles) + '</span></div>';
-  html += '<div class="bottles-row">';
-  html += '<span style="color:var(--o2-color); font-weight:500;">O\u2082 ' + (o2Type === 'k' ? 'K-bottles' : 'T-cylinders') + '</span>';
-  html += '<span class="bottles-count" style="color:var(--o2-color); background:var(--o2-bg);">' + Math.ceil(o2Bottles) + '</span></div>';
-
-  // Usable info
-  html += '<div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.5rem;">';
-  html += 'He usable: ' + heUsable.toFixed(0) + ' cf/bottle \u00b7 O\u2082 usable: ' + o2Usable.toFixed(0) + ' cf/bottle</div>';
-
-  // Cost
-  if (heCost > 0 || o2Cost > 0) {
-    const totalHeCost = Math.ceil(heBottles) * heCost;
-    const totalO2Cost = Math.ceil(o2Bottles) * o2Cost;
-    const totalCost = totalHeCost + totalO2Cost;
-    html += '<div class="cost-row" style="margin-top:0.75rem; padding-top:0.75rem; border-top:2px solid var(--border);">';
-    html += '<span style="color:var(--he-color);">He cost</span>';
-    html += '<span class="cost-value">$' + totalHeCost.toFixed(0) + '</span></div>';
-    html += '<div class="cost-row">';
-    html += '<span style="color:var(--o2-color);">O\u2082 cost</span>';
-    html += '<span class="cost-value">$' + totalO2Cost.toFixed(0) + '</span></div>';
-    html += '<div class="cost-row">';
-    html += '<span style="font-weight:700; color:var(--text);">Total gas cost</span>';
-    html += '<span class="cost-value cost-total">$' + totalCost.toFixed(0) + '</span></div>';
-    const totalCyls = gasCards.reduce((a,c) => a + c.qty, 0);
-    if (totalCyls > 0) {
-      html += '<div class="cost-row">';
-      html += '<span style="color:var(--text-dim);">Cost per cylinder</span>';
-      html += '<span class="cost-value">$' + (totalCost / totalCyls).toFixed(0) + '</span></div>';
-    }
+  // SHOP section
+  if (shopCards.length > 0) {
+    html += '<div style="font-size:0.9rem; font-weight:700; color:var(--warn-color); margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.1em;">Shop (pre-trip)</div>';
+    shopDetails.forEach(d => {
+      html += '<div style="padding:0.35rem 0; border-bottom:1px solid var(--border);">';
+      html += '<div style="font-size:0.85rem; font-weight:600; color:var(--text);">' + d.label + '</div>';
+      html += '<div style="display:flex; gap:0.75rem; font-size:0.8rem;">';
+      html += '<span style="color:var(--he-color);">He: ' + d.heCf.toFixed(0) + ' cf</span>';
+      html += '<span style="color:var(--o2-color);">O\u2082: ' + d.o2Cf.toFixed(0) + ' cf</span>';
+      html += '<span style="color:var(--top-color);">Top: ' + d.topCf.toFixed(0) + ' cf</span>';
+      html += '</div></div>';
+    });
+    html += '<div class="total-row"><span style="color:var(--he-color); font-weight:500;">He</span><span class="total-value" style="color:var(--he-color); background:var(--he-bg);">' + cfLabel(rawShopHe, shopHe) + '</span></div>';
+    html += '<div class="total-row"><span style="color:var(--o2-color); font-weight:500;">O\u2082</span><span class="total-value" style="color:var(--o2-color); background:var(--o2-bg);">' + cfLabel(rawShopO2, shopO2) + '</span></div>';
+    html += '<div class="bottles-row"><span style="color:var(--he-color);">He: ' + shopHeBottles + ' ' + shopHeSup.name + '</span></div>';
+    html += '<div class="bottles-row"><span style="color:var(--o2-color);">O\u2082: ' + shopO2Bottles + ' ' + shopO2Sup.name + '</span></div>';
+    html += '<div style="height:1rem;"></div>';
   }
+
+  // BOAT section
+  if (boatCards.length > 0) {
+    html += '<div style="font-size:0.9rem; font-weight:700; color:var(--top-color); margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.1em;">Boat (field)</div>';
+
+    // 1. BRING ON BOAT — bank cylinders per mix
+    html += '<div style="font-size:0.8rem; font-weight:600; color:var(--text-muted); margin-bottom:0.35rem; text-transform:uppercase; letter-spacing:0.05em;">Bring on boat</div>';
+    boatDetails.forEach(d => {
+      const cf = d.totalCf * (1 + extraPct/100);
+      const bankSpec = SUPPLY_PRESETS[d.bankType];
+      const bankRecv = d.bankRecv;
+      const floor = parseFloat($('gp-floor').value) || 500;
+      const bankUsable = bankSpec ? bankSpec.vol * (bankRecv - floor) / bankSpec.psi : 0;
+      const bankCount = bankUsable > 0 ? Math.ceil(cf / bankUsable) : 0;
+      html += '<div style="padding:0.4rem 0; border-bottom:1px solid var(--border);">';
+      html += '<div style="display:flex; justify-content:space-between; align-items:center;">';
+      html += '<span style="font-size:0.95rem; font-weight:600; color:var(--text);">' + cf.toFixed(0) + ' cf of ' + d.mixName + '</span>';
+      html += '<span class="total-value" style="color:var(--text); background:var(--surface-raised);">' + bankCount + ' ' + d.bankType + '</span>';
+      html += '</div></div>';
+    });
+
+    // 2. ORDER FROM SUPPLIER — components to make those banks
+    html += '<div style="margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid var(--border);">';
+    html += '<div style="font-size:0.8rem; font-weight:600; color:var(--text-muted); margin-bottom:0.35rem; text-transform:uppercase; letter-spacing:0.05em;">Order for boat banks</div>';
+    boatDetails.forEach(d => {
+      if (d.heCf > 0 || (d.o2Cf > 0 && d.topCf > 0)) {
+        html += '<div style="padding:0.35rem 0; border-bottom:1px solid var(--border);">';
+        html += '<div style="font-size:0.85rem; font-weight:600; color:var(--text);">' + d.mixName + '</div>';
+        html += '<div style="display:flex; gap:0.75rem; font-size:0.8rem;">';
+        if (d.heCf > 0) html += '<span style="color:var(--he-color);">He: ' + (d.heCf*(1+extraPct/100)).toFixed(0) + ' cf</span>';
+        if (d.o2Cf > 0) html += '<span style="color:var(--o2-color);">O\u2082: ' + (d.o2Cf*(1+extraPct/100)).toFixed(0) + ' cf</span>';
+        if (d.topCf > 0) html += '<span style="color:var(--top-color);">Top: ' + (d.topCf*(1+extraPct/100)).toFixed(0) + ' cf</span>';
+        html += '</div></div>';
+      }
+    });
+
+    // Total boat components
+    html += '<div style="margin-top:0.5rem;">';
+    html += '<div class="total-row"><span style="color:var(--he-color); font-weight:600;">Total He</span><span class="total-value" style="color:var(--he-color); background:var(--he-bg);">' + cfLabel(rawBoatHe, boatHe) + '</span></div>';
+    html += '<div class="total-row"><span style="color:var(--o2-color); font-weight:600;">Total O\u2082</span><span class="total-value" style="color:var(--o2-color); background:var(--o2-bg);">' + cfLabel(rawBoatO2, boatO2) + '</span></div>';
+    html += '</div></div>';
+    html += '<div style="height:1rem;"></div>';
+  }
+
+  // TRIP TOTAL — all components ordered from supplier
+  const totalHe = shopHe + boatHe;
+  const totalO2 = shopO2 + boatO2;
+  // Use shop supply type for ordering (He/O2 come from supplier as K or T)
+  const orderHe = shopHeSup.usable > 0 ? Math.ceil(totalHe / shopHeSup.usable) : 0;
+  const orderO2 = shopO2Sup.usable > 0 ? Math.ceil(totalO2 / shopO2Sup.usable) : 0;
+
+  html += '<div style="padding-top:0.75rem; border-top:2px solid var(--border);">';
+  html += '<div style="font-size:0.9rem; font-weight:700; color:var(--text); margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.1em;">Total Order (from supplier)</div>';
+  html += '<div class="total-row"><span style="color:var(--he-color); font-weight:600;">He</span><span class="total-value" style="color:var(--he-color); background:var(--he-bg);">' + totalHe.toFixed(0) + ' cf \u2192 ' + orderHe + ' ' + shopHeSup.name + '</span></div>';
+  html += '<div class="total-row"><span style="color:var(--o2-color); font-weight:600;">O\u2082</span><span class="total-value" style="color:var(--o2-color); background:var(--o2-bg);">' + totalO2.toFixed(0) + ' cf \u2192 ' + orderO2 + ' ' + shopO2Sup.name + '</span></div>';
+
+  if (heCost > 0 || o2Cost > 0) {
+    const totalHeCost = orderHe * heCost;
+    const totalO2Cost = orderO2 * o2Cost;
+    html += '<div style="margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid var(--border);">';
+    if (heCost > 0) html += '<div class="cost-row"><span style="color:var(--he-color);">He cost</span><span class="cost-value">$' + totalHeCost.toFixed(0) + '</span></div>';
+    if (o2Cost > 0) html += '<div class="cost-row"><span style="color:var(--o2-color);">O\u2082 cost</span><span class="cost-value">$' + totalO2Cost.toFixed(0) + '</span></div>';
+    html += '<div class="cost-row"><span style="font-weight:700;">Total</span><span class="cost-value cost-total">$' + (totalHeCost + totalO2Cost).toFixed(0) + '</span></div>';
+    html += '</div>';
+  }
+  html += '</div>';
 
   resultsBody.innerHTML = html;
 }
 
-// Supply type change updates spec display
-$('gp-he-type').addEventListener('change', () => {
-  const s = SUPPLY_SPECS[$('gp-he-type').value];
-  $('gp-he-spec').textContent = s.vol + ' cf @ ' + s.psi;
-  $('gp-he-recv').value = $('gp-he-type').value === 't' ? 2400 : s.psi;
-  calcGasPlanning();
+// Wire supply dropdowns and settings
+['gp-shop-he-type','gp-shop-o2-type'].forEach(id => {
+  $(id).addEventListener('change', () => {
+    // Auto-set T recv to 2400
+    if (id.includes('he') && $(id).value === 'T-cylinder') {
+      $(id.replace('-type', '-recv')).value = 2400;
+    } else if (id.includes('o2') && $(id).value === 'T-cylinder') {
+      $(id.replace('-type', '-recv')).value = 2400;
+    } else {
+      const spec = SUPPLY_PRESETS[$(id).value];
+      if (spec) $(id.replace('-type', '-recv')).value = spec.psi;
+    }
+    calcGasPlanning();
+  });
 });
-$('gp-o2-type').addEventListener('change', () => {
-  const s = SUPPLY_SPECS[$('gp-o2-type').value];
-  $('gp-o2-spec').textContent = s.vol + ' cf @ ' + s.psi;
-  $('gp-o2-recv').value = $('gp-o2-type').value === 't' ? 2400 : s.psi;
-  calcGasPlanning();
-});
-['gp-he-recv','gp-o2-recv','gp-floor','gp-he-cost','gp-o2-cost','gp-extra-pct'].forEach(id => {
+['gp-shop-he-recv','gp-shop-o2-recv','gp-floor','gp-extra-pct','gp-he-cost','gp-o2-cost'].forEach(id => {
   $(id).addEventListener('input', calcGasPlanning);
 });
 
-$('gp-add-gas').addEventListener('click', () => addGasCard());
+$('gp-shop-add').addEventListener('click', () => {
+  createCard(shopCards, { qty: 4, preset: 'AL80', o2: 21, he: 0, tgtPsi: 3000 });
+  renderCards(shopCards, 'gp-shop-cards', false);
+  wireCardEvents(shopCards, 'gp-shop-cards', false);
+  calcGasPlanning();
+});
+$('gp-boat-add').addEventListener('click', () => {
+  createCard(boatCards, { preset: 'AL80', o2: 21, he: 0, tgtPsi: 3000, usePerFill: true, cfPerFill: 10 });
+  renderCards(boatCards, 'gp-boat-cards', true);
+  wireCardEvents(boatCards, 'gp-boat-cards', true);
+  calcGasPlanning();
+});
 
-// Add a default card
-addGasCard({ qty: 4, preset: 'AL80', o2: 10, he: 70, tgtPsi: 3000, topO2: 21 });
+// Init
+populateSupplyDropdowns();
+// Default shop: 4x AL19 of 16/50
+createCard(shopCards, { qty: 4, preset: 'AL19', o2: 16, he: 50, tgtPsi: 3000 });
+renderCards(shopCards, 'gp-shop-cards', false);
+wireCardEvents(shopCards, 'gp-shop-cards', false);
+// Default boat: 10cf 16/50 per fill
+createCard(boatCards, { o2: 16, he: 50, cylCf: 20, endingCf: 10, bankType: 'Twin 80s', bankRecv: 3000 });
+createCard(boatCards, { o2: 100, he: 0, cylCf: 20, endingCf: 10, topO2: 100, bankType: 'AL80', bankRecv: 3000 });
+renderCards(boatCards, 'gp-boat-cards', true);
+wireCardEvents(boatCards, 'gp-boat-cards', true);
 
 
 function recalcAll() { calcBlender(); calcTopoff(); calcModMix(); calcGasPlanning(); }
