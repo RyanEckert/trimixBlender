@@ -84,12 +84,7 @@
   .toggle button.active { background: var(--surface-raised); color: var(--text); }
 
   .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.75rem; }
-  @media (max-width: 680px) {
-  .calc-grid { grid-template-columns: 1fr; }
-  .tabs { flex-wrap: wrap; }
-  .tab { flex: 1 1 45%; font-size: 0.85rem; padding: 0.6rem 0.4rem; }
-}
-
+  @media (max-width: 680px) { .calc-grid { grid-template-columns: 1fr; } }
   .col { display: flex; flex-direction: column; gap: 1.5rem; }
 
   .section { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; transition: border-color 0.2s; }
@@ -740,7 +735,7 @@
         </div>
 
         <div class="section">
-          <div class="section-header">Settings</div>
+          <div class="section-header">Supply Gas Settings</div>
           <div class="section-body">
             <div class="supply-row">
               <span class="input-label" style="min-width:28px;">Floor</span>
@@ -1464,9 +1459,6 @@ const SUPPLY_PRESETS = {
   'HP80': { vol: 80, psi: 3442 },
   'HP100': { vol: 100, psi: 3442 },
   'HP120': { vol: 119, psi: 3442 },
-  'Twin 80s': { vol: 154.8, psi: 3000 },
-  'Twin 100s': { vol: 200, psi: 3442 },
-  'Twin 120s': { vol: 238, psi: 3442 },
 };
 
 let shopCards = [], boatCards = [];
@@ -1506,6 +1498,7 @@ function createCard(pool, cfg) {
     divers: cfg?.divers || 4,
     dpd: cfg?.dpd || 2,
     days: cfg?.days || 7,
+    bankEndPsi: cfg?.bankEndPsi || 500,
   };
   pool.push(card);
   return card;
@@ -1554,7 +1547,16 @@ function renderCards(pool, containerId, isBoat) {
       html += '<div class="input-row"><span class="input-label">Bank in</span>' +
         '<select class="supply-select gc-input" data-id="' + card.id + '" data-field="bankType">' + bankOpts + '</select></div>' +
         '<div class="input-row"><span class="input-label">Bank recv psi</span>' +
-        '<input type="number" class="gc-input" data-id="' + card.id + '" data-field="bankRecv" value="' + card.bankRecv + '" style="width:65px;"></div>';
+        '<input type="number" class="gc-input" data-id="' + card.id + '" data-field="bankRecv" value="' + card.bankRecv + '" style="width:65px;"></div>' +
+        '<div class="input-row"><span class="input-label">Bank end psi</span>' +
+        '<input type="number" class="gc-input" data-id="' + card.id + '" data-field="bankEndPsi" value="' + card.bankEndPsi + '" style="width:65px;"></div>';
+      // Doubles toggle for bank
+      html += '<div style="padding:0.4rem 0; border-top:1px solid var(--border); display:flex; align-items:center; gap:0.5rem;">' +
+        '<span style="font-size:0.8rem; color:var(--text-muted);">Bank</span>' +
+        '<div class="toggle" style="font-size:0.75rem;">' +
+        '<button class="gc-toggle' + (!card.doubles ? ' active' : '') + '" data-id="' + card.id + '" data-toggle="doubles" data-val="single" style="padding:0.3rem 0.6rem; font-size:0.75rem;">Single</button>' +
+        '<button class="gc-toggle' + (card.doubles ? ' active' : '') + '" data-id="' + card.id + '" data-toggle="doubles" data-val="doubles" style="padding:0.3rem 0.6rem; font-size:0.75rem;">Doubles</button>' +
+        '</div></div>';
     } else {
       // Shop card: always cylinder-based
       html += '<div class="input-row"><span class="input-label">Qty</span>' +
@@ -1581,9 +1583,12 @@ function renderCards(pool, containerId, isBoat) {
 
     // Tags
     if (!isBoat) {
-      html += '<div class="gas-card-tags">' +
-        '<button class="gas-tag' + (card.doubles ? ' active' : '') + '" data-id="' + card.id + '" data-toggle="doubles">Doubles</button>' +
-        '</div>';
+      html += '<div style="padding:0.4rem 1rem 0.6rem; border-top:1px solid var(--border); display:flex; align-items:center; gap:0.5rem;">' +
+        '<span style="font-size:0.8rem; color:var(--text-muted);">Config</span>' +
+        '<div class="toggle" style="font-size:0.75rem;">' +
+        '<button class="gc-toggle' + (!card.doubles ? ' active' : '') + '" data-id="' + card.id + '" data-toggle="doubles" data-val="single" style="padding:0.3rem 0.6rem; font-size:0.75rem;">Single</button>' +
+        '<button class="gc-toggle' + (card.doubles ? ' active' : '') + '" data-id="' + card.id + '" data-toggle="doubles" data-val="doubles" style="padding:0.3rem 0.6rem; font-size:0.75rem;">Doubles</button>' +
+        '</div></div>';
     }
 
     const div = document.createElement('div');
@@ -1604,6 +1609,11 @@ function wireCardEvents(pool, containerId, isBoat) {
       const card = pool.find(c => c.id === parseInt(tag.dataset.id));
       if (card) { card[tag.dataset.toggle] = !card[tag.dataset.toggle]; renderCards(pool, containerId, isBoat); wireCardEvents(pool, containerId, isBoat); calcGasPlanning(); }
     }
+    const tog = e.target.closest('.gc-toggle');
+    if (tog) {
+      const card = pool.find(c => c.id === parseInt(tog.dataset.id));
+      if (card) { card[tog.dataset.toggle] = tog.dataset.val === 'doubles'; renderCards(pool, containerId, isBoat); wireCardEvents(pool, containerId, isBoat); calcGasPlanning(); }
+    }
   };
   container.oninput = (e) => {
     const input = e.target.closest('.gc-input');
@@ -1619,7 +1629,7 @@ function wireCardEvents(pool, containerId, isBoat) {
       const spec = SUPPLY_PRESETS[input.value];
       if (spec) card.bankRecv = input.value === 'T-cylinder' ? 2400 : spec.psi;
       renderCards(pool, containerId, isBoat); wireCardEvents(pool, containerId, isBoat);
-    } else if (['qty','customVol','customPsi','o2','he','tgtPsi','topO2','topHe','cfPerFill','cylCf','endingCf','bankRecv','divers','dpd','days'].includes(field)) {
+    } else if (['qty','customVol','customPsi','o2','he','tgtPsi','topO2','topHe','cfPerFill','cylCf','endingCf','bankRecv','bankEndPsi','divers','dpd','days'].includes(field)) {
       card[field] = parseFloat(input.value) || 0;
       if (field === 'cylCf' || field === 'endingCf') {
         renderCards(pool, containerId, isBoat); wireCardEvents(pool, containerId, isBoat);
@@ -1693,7 +1703,7 @@ function calcGasPlanning() {
     const desc = cfUsed + ' cf/fill';
     const bankType = card.bankType;
     const bankRecv = card.bankRecv;
-    boatDetails.push({ label: g.mixName + ' \u00b7 ' + g.fills + ' fills (' + (card.divers||1) + ' divers \u00d7 ' + (card.dpd||1) + '/day \u00d7 ' + (card.days||1) + 'd)', bankType, bankRecv, ...g });
+    boatDetails.push({ bankEndPsi: card.bankEndPsi || 500, bankDoubles: card.doubles, label: g.mixName + ' \u00b7 ' + g.fills + ' fills (' + (card.divers||1) + ' divers \u00d7 ' + (card.dpd||1) + '/day \u00d7 ' + (card.days||1) + 'd)', bankType, bankRecv, ...g });
     // Track total cf per mix
     if (!boatMixes[g.mixName]) boatMixes[g.mixName] = 0;
     boatMixes[g.mixName] += g.totalCf;
@@ -1753,13 +1763,14 @@ function calcGasPlanning() {
       const cf = d.totalCf * (1 + extraPct/100);
       const bankSpec = SUPPLY_PRESETS[d.bankType];
       const bankRecv = d.bankRecv;
-      const floor = parseFloat($('gp-floor').value) || 500;
-      const bankUsable = bankSpec ? bankSpec.vol * (bankRecv - floor) / bankSpec.psi : 0;
+      const bankEnd = d.bankEndPsi || 500;
+      const bankVol = bankSpec ? bankSpec.vol * (d.bankDoubles ? 2 : 1) : 0;
+      const bankUsable = bankVol * (bankRecv - bankEnd) / (bankSpec ? bankSpec.psi : 1);
       const bankCount = bankUsable > 0 ? Math.ceil(cf / bankUsable) : 0;
       html += '<div style="padding:0.4rem 0; border-bottom:1px solid var(--border);">';
       html += '<div style="display:flex; justify-content:space-between; align-items:center;">';
       html += '<span style="font-size:0.95rem; font-weight:600; color:var(--text);">' + cf.toFixed(0) + ' cf of ' + d.mixName + '</span>';
-      html += '<span class="total-value" style="color:var(--text); background:var(--surface-raised);">' + bankCount + ' ' + d.bankType + '</span>';
+      html += '<span class="total-value" style="color:var(--text); background:var(--surface-raised);">' + bankCount + ' ' + (d.bankDoubles ? 'Dbl ' : '') + d.bankType + '</span>';
       html += '</div></div>';
     });
 
@@ -1851,8 +1862,8 @@ createCard(shopCards, { qty: 4, preset: 'AL19', o2: 16, he: 50, tgtPsi: 3000 });
 renderCards(shopCards, 'gp-shop-cards', false);
 wireCardEvents(shopCards, 'gp-shop-cards', false);
 // Default boat: 10cf 16/50 per fill
-createCard(boatCards, { o2: 16, he: 50, cylCf: 20, endingCf: 10, bankType: 'Twin 80s', bankRecv: 3000 });
-createCard(boatCards, { o2: 100, he: 0, cylCf: 20, endingCf: 10, topO2: 100, bankType: 'AL80', bankRecv: 3000 });
+createCard(boatCards, { o2: 16, he: 50, cylCf: 20, endingCf: 10, bankType: 'AL80', bankRecv: 3000, bankEndPsi: 500, doubles: true });
+createCard(boatCards, { o2: 100, he: 0, cylCf: 20, endingCf: 10, topO2: 100, bankType: 'AL80', bankRecv: 3000, bankEndPsi: 500 });
 renderCards(boatCards, 'gp-boat-cards', true);
 wireCardEvents(boatCards, 'gp-boat-cards', true);
 
