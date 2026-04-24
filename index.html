@@ -1924,10 +1924,19 @@ function saveRecipe() {
   if (!stopsBody || stopsBody.children.length === 0) return;
 
   const tgtO2 = val('b-tgt-o2'), tgtHe = val('b-tgt-he');
+  const curO2 = val('b-cur-o2'), curHe = val('b-cur-he');
   const tgtP = readPsi('b-tgt-psi');
   const curP = readPsi('b-cur-psi');
   const pu = globalUnit;
   const mixName = Math.round(tgtO2) + '/' + Math.round(tgtHe);
+
+  // Capture drain state from DOM
+  const drainEl = $('b-drain');
+  const drainText = drainEl ? drainEl.textContent : '';
+  const hasDrain = drainText !== 'No drain needed' && drainText !== '\u2014';
+
+  // Capture current mix display
+  const curMixName = Math.round(curO2) + '/' + Math.round(curHe);
 
   // Capture stops from DOM
   const stops = [];
@@ -1945,12 +1954,13 @@ function saveRecipe() {
     mixName,
     tgtP: showPressure(tgtP, pu),
     curP: showPressure(curP, pu),
+    curMixName,
     pu,
     stops,
+    drainTo: hasDrain ? drainText : null,
   });
 
   renderFillSheet();
-  // Show tab
   $('fs-tab').style.display = '';
 }
 
@@ -1975,6 +1985,10 @@ function renderFillSheet() {
     card.className = 'fs-card';
 
     let stopsHtml = '';
+    // Show drain first if needed
+    if (r.drainTo) {
+      stopsHtml += '<div class="stop" style="color:var(--err-color);"><span class="stop-num" style="background:var(--err-bg); border-color:var(--err-border); color:var(--err-color);">\u2193</span><span class="stop-label">Drain to</span><span class="stop-value">' + r.drainTo + '</span></div>';
+    }
     r.stops.forEach((s, i) => {
       stopsHtml += '<div class="stop ' + s.cls + '">' +
         '<span class="stop-num">' + (i+1) + '</span>' +
@@ -1982,10 +1996,18 @@ function renderFillSheet() {
         '<span class="stop-value">' + s.value + '</span></div>';
     });
 
+    // Header: show starting state properly
+    let fromText = '';
+    if (r.curP > 0) {
+      fromText = ' \u00b7 from ' + r.curP + ' ' + r.pu + ' ' + r.curMixName;
+    } else {
+      fromText = ' \u00b7 from empty';
+    }
+
     card.innerHTML = '<div class="fs-card-header">' +
       '<div><span class="fs-card-mix">' + r.mixName + '</span>' +
-      '<span class="fs-card-info"> @ ' + r.tgtP + ' ' + r.pu + ' · from ' + r.curP + '</span></div>' +
-      '<button class="fs-card-remove" data-rid="' + r.id + '">×</button></div>' +
+      '<span class="fs-card-info"> @ ' + r.tgtP + ' ' + r.pu + fromText + '</span></div>' +
+      '<button class="fs-card-remove" data-rid="' + r.id + '">\u00d7</button></div>' +
       '<div class="fs-card-body">' + stopsHtml + '</div>';
 
     container.appendChild(card);
