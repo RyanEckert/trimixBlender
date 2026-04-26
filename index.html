@@ -174,7 +174,7 @@
   .error-banner.visible { display: block; }
 
   .best-i-can-do {
-    display: none; margin-top: 1.75rem; border-radius: 10px;
+    display: none; margin-bottom: 1.75rem; border-radius: 10px;
     overflow: hidden; border: 1px solid var(--warn-border); background: var(--surface);
   }
   .best-i-can-do.visible { display: block; }
@@ -498,6 +498,19 @@
   <!-- ==================== BLENDER ==================== -->
   <div id="blender" class="tab-content active">
 
+    <div class="best-i-can-do" id="b-best">
+      <div class="error-banner" id="b-error" style="margin:0; border-radius:0; border:none; border-bottom:1px solid var(--err-border);"></div>
+      <div class="best-i-can-do-header">
+        <img id="best-img" class="best-img" src="https://i.kym-cdn.com/photos/images/original/002/137/897/75a.jpg" alt="">
+        <div class="meme-text">Best I can do is...</div>
+      </div>
+      <div class="best-i-can-do-body">
+        <div class="best-mix" id="b-best-mix">—</div>
+        <div class="best-mix-detail" id="b-best-detail"></div>
+        <div class="best-mix-detail" id="b-best-recipe" style="margin-top:0.6rem; padding-top:0.6rem; border-top:1px solid var(--border); font-size:1.2rem; font-weight:700;"></div>
+      </div>
+    </div>
+
     <div class="calc-grid">
       <div class="col">
         <div class="section">
@@ -568,18 +581,6 @@
             <div class="dive-row"><span class="dive-label">MOD @ ppO₂ 1.6</span><span class="dive-value" id="b-mod16">—</span></div>
           </div>
         </div>
-      </div>
-    </div>
-    <div class="best-i-can-do" id="b-best">
-      <div class="error-banner" id="b-error" style="margin:0; border-radius:0; border:none; border-bottom:1px solid var(--err-border);"></div>
-      <div class="best-i-can-do-header">
-        <img id="best-img" class="best-img" src="https://i.kym-cdn.com/photos/images/original/002/137/897/75a.jpg" alt="">
-        <div class="meme-text">Best I can do is...</div>
-      </div>
-      <div class="best-i-can-do-body">
-        <div class="best-mix" id="b-best-mix">—</div>
-        <div class="best-mix-detail" id="b-best-detail"></div>
-        <div class="best-mix-detail" id="b-best-recipe" style="margin-top:0.6rem; padding-top:0.6rem; border-top:1px solid var(--border); font-size:1.2rem; font-weight:700;"></div>
       </div>
     </div>
   </div>
@@ -993,7 +994,12 @@ function calcBlendZ(curPsi, curO2, curHe, tgtPsi, tgtO2, tgtHe, topO2, topHe, o2
     dnO2Src = dnN2_need > 0 ? dnN2_need / (o2SrcN2/100) : 0;
   }
   
-  const dnHePureFinal = dnHe_need - dnTop * topHe/100;
+  let dnHePureFinal = dnHe_need - dnTop * topHe/100;
+
+  // Clamp tiny negatives to 0 (Z-factor rounding can push values slightly below zero)
+  if (dnHePureFinal > -5 && dnHePureFinal < 0) dnHePureFinal = 0;
+  if (dnO2Src > -5 && dnO2Src < 0) dnO2Src = 0;
+  if (dnTop > -5 && dnTop < 0) dnTop = 0;
 
   const feasible = dnHePureFinal >= -0.5 && dnO2Src >= -0.5 && dnTop >= -0.5;
   if (!feasible) return { feasible: false, dnHePure: dnHePureFinal, dnO2Pure: dnO2Src, dnTop };
@@ -1315,6 +1321,7 @@ function calcBlender() {
     if (bTopR >= 1) { bStops.push(tName + ' \u2192 ' + sp(tgtP)); }
     $('b-best-recipe').innerHTML = bStops.length ? '<span style="color:var(--text-muted); font-size:1.1rem;">Fill plan: </span>' + bStops.join(' \u00b7 ') : '';
     bestEl.classList.add('visible');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     ['b-add-section','b-stops-section'].forEach(id => $(id).classList.add('dimmed'));
     $('b-drain').textContent = 'Not possible'; $('b-drain').className = 'drain-value warn';
     $('b-drain-section').classList.add('error-state'); $('b-drain-section').classList.remove('warn-state');
